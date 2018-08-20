@@ -63,10 +63,12 @@ fn print_item<T: TreeItem, W: io::Write>(
     Ok(())
 }
 
+/// Print the tree `item` to standard output using default formatting
 pub fn print_tree<T: TreeItem>(item: &T) -> io::Result<()> {
     print_tree_with(item, &PrintConfig::for_stdout())
 }
 
+/// Print the tree `item` to standard output using custom formatting
 pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Result<()> {
     let chars = Indent::from_config(config);
     let out = io::stdout();
@@ -82,10 +84,12 @@ pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Resul
     )
 }
 
+/// Write the tree `item` to writer `f` using default formatting
 pub fn write_tree<T: TreeItem, W: io::Write>(item: &T, mut f: W) -> io::Result<()> {
     write_tree_with(item, &mut f, &PrintConfig::default())
 }
 
+/// Write the tree `item` to writer `f` using custom formatting
 pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &PrintConfig) -> io::Result<()> {
     let chars = Indent::from_config(config);
     print_item(

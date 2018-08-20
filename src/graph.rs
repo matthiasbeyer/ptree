@@ -33,6 +33,9 @@ where
     }
 }
 
+///
+/// Print `graph`, starting at node `start`, to standard output using default formatting
+///
 pub fn print_graph<N, E, Ty, Ix>(graph: &Graph<N, E, Ty, Ix>, start: NodeIndex<Ix>) -> io::Result<()>
 where
     Ty: EdgeType,
@@ -43,6 +46,9 @@ where
     print_tree(&(graph, start))
 }
 
+///
+/// Write `graph`, starting at node `start`, to writer `f` using custom formatting
+///
 pub fn write_graph_with<N, E, Ty, Ix, W: io::Write>(
     graph: &Graph<N, E, Ty, Ix>,
     start: NodeIndex<Ix>,
