@@ -148,15 +148,6 @@ pub mod config;
 ///
 pub mod print_tree;
 
-#[cfg(feature = "path")]
-///
-/// Implementation of `TreeItem` for `PathBuf`, allowing easy printing
-/// of file and directory trees
-///
-/// This module is enabled by the `"path"` feature.
-///
-pub mod path;
-
 #[cfg(feature = "petgraph")]
 ///
 /// Implementation of `TreeItem` for `petgraph::Graph`

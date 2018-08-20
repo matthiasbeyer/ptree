@@ -15,8 +15,7 @@ appveyor = { repository = "Noughmad/ptree", service = "gitlab" }
 codecov = { repository = "Noughmad/ptree", service = "gitlab" }
 
 [features]
-default = ["path", "petgraph", "ansi", "serde"]
-path = []
+default = ["petgraph", "ansi", "serde"]
 ansi = ["ansi_term", "isatty"]
 serde = ["serde-value"]
 
@@ -33,7 +32,6 @@ version-sync = "0.5.0"
 
 [[example]]
 name = "dirtree"
-required-features = ["path"]
 
 [[example]]
 name = "petgraph"
