@@ -5,6 +5,6 @@ test:cargo:
   - rustc --version && cargo --version
   - cargo test --all
   - cargo doc
-  - linkchecker target/doc/serde_any/
+  - linkchecker target/doc/ptree/
   - cargo tarpaulin --out Xml
   - "bash <(curl -s https://codecov.io/bash)"
