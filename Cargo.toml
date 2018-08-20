@@ -9,6 +9,10 @@ keywords = ["tree", "cli", "terminal"]
 categories = ["command-line-interface"]
 readme = "README.md"
 
+[badges]
+gitlab = { repository = "Noughmad/ptree", branch = "master" }
+appveyor = { repository = "Noughmad/ptree", service = "gitlab" }
+codecov = { repository = "Noughmad/ptree", service = "gitlab" }
 
 [features]
 default = ["path", "petgraph", "ansi", "serde"]
