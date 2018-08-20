@@ -1,11 +1,19 @@
 use item::StringItem;
 
+///
+/// A builder for a tree of `StringItem`s
+///
 pub struct TreeBuilder {
     item: StringItem,
     level: u32,
 }
 
 impl TreeBuilder {
+    ///
+    /// Start building a tree
+    ///
+    /// The `text` argument will be the top level item's text.
+    ///
     pub fn new(text: String) -> TreeBuilder {
         TreeBuilder {
             item: StringItem {
@@ -24,6 +32,9 @@ impl TreeBuilder {
         }
     }
 
+    ///
+    /// Add a child to the current item and make the new child current
+    ///
     pub fn begin_child(&mut self, text: String) -> &mut Self {
         TreeBuilder::append_child_level(
             &mut self.item,
@@ -37,15 +48,24 @@ impl TreeBuilder {
         self
     }
 
+    ///
+    /// Finish adding children, and make the current item's parent current
+    ///
     pub fn end_child(&mut self) -> &mut Self {
         self.level -= 1;
         self
     }
 
+    ///
+    /// Add an empty child (leaf item) to the current item
+    ///
     pub fn add_empty_child(&mut self, text: String) -> &mut Self {
         self.begin_child(text).end_child()
     }
 
+    ///
+    /// Finish building the tree and return the top level item
+    ///
     pub fn build(&mut self) -> StringItem {
         self.item.clone()
     }

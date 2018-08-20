@@ -3,6 +3,33 @@ use config::*;
 
 use std::io;
 
+struct Indent {
+    pub regular_prefix: String,
+    pub child_prefix: String,
+    pub last_regular_prefix: String,
+    pub last_child_prefix: String,
+}
+
+impl Indent {
+    pub fn from_config(config: &PrintConfig) -> Indent {
+        Self::from_chars(config.indent_size, &config.chars)
+    }
+
+    pub fn from_chars(indent_size: usize, chars: &IndentChars) -> Indent {
+        let n = if indent_size > 2 { indent_size - 2 } else { 0 };
+
+        let right_pad = chars.right.repeat(n);
+        let empty_pad = chars.empty.repeat(n);
+
+        Indent {
+            regular_prefix: format!("{}{} ", chars.down_and_right, right_pad),
+            child_prefix: format!("{}{} ", chars.down, empty_pad),
+            last_regular_prefix: format!("{}{} ", chars.turn_right, right_pad),
+            last_child_prefix: format!("{}{} ", chars.empty, empty_pad),
+        }
+    }
+}
+
 fn print_item<T: TreeItem, W: io::Write>(
     item: &T,
     f: &mut W,
@@ -41,7 +68,7 @@ pub fn print_tree<T: TreeItem>(item: &T) -> io::Result<()> {
 }
 
 pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Result<()> {
-    let chars = config.create_indent_chars();
+    let chars = Indent::from_config(config);
     let out = io::stdout();
     let mut handle = out.lock();
     print_item(
@@ -60,7 +87,7 @@ pub fn write_tree<T: TreeItem, W: io::Write>(item: &T, mut f: W) -> io::Result<(
 }
 
 pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &PrintConfig) -> io::Result<()> {
-    let chars = config.create_indent_chars();
+    let chars = Indent::from_config(config);
     print_item(
         item,
         &mut f,
