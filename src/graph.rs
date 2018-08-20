@@ -33,10 +33,7 @@ where
     }
 }
 
-pub fn print_graph<N, E, Ty, Ix>(
-    graph: &Graph<N, E, Ty, Ix>,
-    start: NodeIndex<Ix>,
-) -> io::Result<()>
+pub fn print_graph<N, E, Ty, Ix>(graph: &Graph<N, E, Ty, Ix>, start: NodeIndex<Ix>) -> io::Result<()>
 where
     Ty: EdgeType,
     Ix: IndexType,

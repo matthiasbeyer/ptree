@@ -48,11 +48,7 @@ impl TreeItem for Value {
                         Value::Map(_) => (value_to_string(k), v.clone()),
                         _ => (
                             "".to_string(),
-                            Value::String(format!(
-                                "{} = {}",
-                                value_to_string(k),
-                                value_to_string(v)
-                            )),
+                            Value::String(format!("{} = {}", value_to_string(k), value_to_string(v))),
                         ),
                     })
                     .collect();
@@ -88,11 +84,7 @@ impl TreeItem for (String, Value) {
                         Value::Map(_) => (value_to_string(k), v.clone()),
                         _ => (
                             "".to_string(),
-                            Value::String(format!(
-                                "{} = {}",
-                                value_to_string(k),
-                                value_to_string(v)
-                            )),
+                            Value::String(format!("{} = {}", value_to_string(k), value_to_string(v))),
                         ),
                     })
                     .collect();

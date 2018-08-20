@@ -11,6 +11,7 @@ use structopt::StructOpt;
 use std::path::PathBuf;
 use std::fs::File;
 use ansi_term::{Color, Style};
+use ptree::config;
 
 #[derive(Clone, Debug, StructOpt)]
 struct Opt {
@@ -38,12 +39,12 @@ struct Opt {
 
 fn chars_from_str(s: &&str) -> ptree::IndentChars<'static> {
     match &s.to_lowercase()[..] {
-        "ascii" | "ascii-plus" => ptree::ASCII_CHARS_PLUS,
-        "ascii-tick" => ptree::ASCII_CHARS_TICK,
-        "utf" => ptree::UTF_CHARS,
-        "utf-bold" => ptree::UTF_CHARS_BOLD,
-        "utf-double" => ptree::UTF_CHARS_DOUBLE,
-        _ => ptree::UTF_CHARS,
+        "ascii" | "ascii-plus" => config::ASCII_CHARS_PLUS,
+        "ascii-tick" => config::ASCII_CHARS_TICK,
+        "utf" => config::UTF_CHARS,
+        "utf-bold" => config::UTF_CHARS_BOLD,
+        "utf-double" => config::UTF_CHARS_DOUBLE,
+        _ => config::UTF_CHARS,
     }
 }
 

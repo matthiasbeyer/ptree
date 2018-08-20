@@ -59,11 +59,7 @@ pub fn write_tree<T: TreeItem, W: io::Write>(item: &T, mut f: W) -> io::Result<(
     write_tree_with(item, &mut f, &PrintConfig::default())
 }
 
-pub fn write_tree_with<T: TreeItem, W: io::Write>(
-    item: &T,
-    mut f: W,
-    config: &PrintConfig,
-) -> io::Result<()> {
+pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &PrintConfig) -> io::Result<()> {
     let chars = config.create_indent_chars();
     print_item(
         item,

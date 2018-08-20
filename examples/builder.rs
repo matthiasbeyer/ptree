@@ -1,7 +1,7 @@
 extern crate ansi_term;
 extern crate ptree;
 
-use ptree::{print_tree_with, PrintConfig, TreeBuilder, UTF_CHARS_BOLD};
+use ptree::{print_tree_with, PrintConfig, TreeBuilder, config::UTF_CHARS_BOLD};
 use ansi_term::{Color, Style};
 
 fn main() {
