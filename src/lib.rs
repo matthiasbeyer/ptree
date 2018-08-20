@@ -90,6 +90,32 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! ## Write to a file
+//!
+//! ```
+//! # use std::collections::HashMap;
+//! # use std::io;
+//! # use std::error::Error;
+//! # use std::fs::{File, remove_file};
+//! # use ptree::{write_tree, TreeBuilder};
+//! # fn main() -> Result<(), Box<Error>> {
+//! // Build a tree using a TreeBuilder
+//! let tree = TreeBuilder::new("tree".to_string())
+//!     .add_empty_child("empty branch".to_string())
+//!     .build();
+//!
+//! // Open a file for writing
+//! let file_name = "tree.txt";
+//! let file = File::create(&file_name)?;
+//!
+//! // Write out the tree to the file
+//! write_tree(&tree, file)?;
+//!
+//! # remove_file(&file_name)?;
+//! # Ok(())
+//! # }
+//! ```
 
 #[cfg(feature = "petgraph")]
 extern crate petgraph;
@@ -102,18 +128,50 @@ extern crate isatty;
 #[cfg(feature = "serde")]
 extern crate serde_value;
 
-pub mod print_tree;
-pub mod builder;
+///
+/// Contains the `TreeItem` trait
+///
 pub mod item;
+
+///
+/// Contains the `TreeBuilder` structure, useful for manually constructing trees
+///
+pub mod builder;
+
+///
+/// Structures to control the output formatting
+///
 pub mod config;
 
+///
+/// Functions for printing trees to standard output or to custom writers
+///
+pub mod print_tree;
+
 #[cfg(feature = "path")]
+///
+/// Implementation of `TreeItem` for `PathBuf`, allowing easy printing
+/// of file and directory trees
+///
+/// This module is enabled by the `"path"` feature.
+///
 pub mod path;
 
 #[cfg(feature = "petgraph")]
+///
+/// Implementation of `TreeItem` for `petgraph::Graph`
+///
+/// This module is enabled by the `"petgraph"` feature.
+///
 pub mod graph;
 
 #[cfg(feature = "serde")]
+///
+/// Implementation of `TreeItem` for `serde_value::Value`, allowing easy printing
+/// deserialized structures from a variety of formats.
+///
+/// This module is enabled by the `"serde"` feature.
+///
 pub mod value;
 
 pub use print_tree::{print_tree, print_tree_with, write_tree, write_tree_with};
