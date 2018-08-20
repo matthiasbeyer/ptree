@@ -113,25 +113,25 @@ pub struct IndentChars<'a> {
 }
 
 ///
+/// ASCII indentation characters, using a tick (`\``) for turning right
+///
+/// This is the character used in the Linux command `tree --charset=ascii`.
+///
+pub const ASCII_CHARS_TICK: IndentChars<'static> = IndentChars {
+    down_and_right: "|",
+    down: "|",
+    turn_right: "`",
+    right: "-",
+    empty: " ",
+};
+
+///
 /// ASCII indentation characters, using a plus (`+`) for turning right
 ///
 pub const ASCII_CHARS_PLUS: IndentChars<'static> = IndentChars {
     down_and_right: "+",
     down: "|",
     turn_right: "+",
-    right: "-",
-    empty: " ",
-};
-
-///
-/// ASCII indentation characters, using a tick (`\``) for turning right
-///
-/// This is the character used in the Linux command `tree --charset=ascii`.
-///
-pub const ASCII_CHARS_TICK: IndentChars<'static> = IndentChars {
-    down_and_right: "+",
-    down: "|",
-    turn_right: "`",
     right: "-",
     empty: " ",
 };

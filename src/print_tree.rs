@@ -102,3 +102,42 @@ pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &P
         0,
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use config::PrintConfig;
+
+    #[test]
+    fn indent_from_chars() {
+        let indent = Indent::from_chars(4, &UTF_CHARS);
+        assert_eq!(indent.regular_prefix, "├── ");
+        assert_eq!(indent.last_regular_prefix, "└── ");
+        assert_eq!(indent.child_prefix, "│   ");
+        assert_eq!(indent.last_child_prefix, "    ");
+    }
+
+    #[test]
+    fn indent_from_chars_ascii() {
+        let indent = Indent::from_chars(6, &ASCII_CHARS_TICK);
+        assert_eq!(indent.regular_prefix, "|---- ");
+        assert_eq!(indent.last_regular_prefix, "`---- ");
+        assert_eq!(indent.child_prefix, "|     ");
+        assert_eq!(indent.last_child_prefix, "      ");
+    }
+
+    #[test]
+    fn indent_from_config() {
+        let config = {
+            let mut config = PrintConfig::default();
+            config.indent_size = 3;
+            config.chars = UTF_CHARS;
+            config
+        };
+        let indent = Indent::from_config(&config);
+        assert_eq!(indent.regular_prefix, "├─ ");
+        assert_eq!(indent.last_regular_prefix, "└─ ");
+        assert_eq!(indent.child_prefix, "│  ");
+        assert_eq!(indent.last_child_prefix, "   ");
+    }
+}
