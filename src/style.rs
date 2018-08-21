@@ -124,11 +124,23 @@ impl Color {
             Color::White => ansi_term::Color::White,
             Color::Fixed(f) => ansi_term::Color::Fixed(*f),
             Color::RGB(r, g, b) => ansi_term::Color::RGB(*r, *g, *b),
-            Color::Named(n) => {
-                let c = tint::Color::from(n);
-                let (r, g, b) = c.to_rgb255();
-                ansi_term::Color::RGB(r, g, b)
-            }
+            Color::Named(n) => match &n[..] {
+                // ANSI color names still take precedence over HTML and CSS colors,
+                // because only ANSI colors can be dimmed.
+                "black" => ansi_term::Color::Black,
+                "red" => ansi_term::Color::Red,
+                "green" => ansi_term::Color::Green,
+                "yellow" => ansi_term::Color::Yellow,
+                "blue" => ansi_term::Color::Blue,
+                "purple" => ansi_term::Color::Purple,
+                "cyan" => ansi_term::Color::Cyan,
+                "white" => ansi_term::Color::White,
+                n => {
+                    let c = tint::Color::from(n);
+                    let (r, g, b) = c.to_rgb255();
+                    ansi_term::Color::RGB(r, g, b)
+                }
+            },
         }
     }
 }
