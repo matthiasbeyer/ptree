@@ -175,3 +175,87 @@ impl Style {
         return input;
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use serde_any;
+    use ansi_term;
+    use super::*;
+
+    #[derive(Deserialize)]
+    pub struct Wrapper {
+        color: Color,
+    }
+
+    fn toml_to_ansi(s: &str) -> ansi_term::Color {
+        serde_any::from_str::<Wrapper>(&format!("color = {}", s), serde_any::Format::Toml)
+            .unwrap()
+            .color
+            .to_ansi_color()
+    }
+
+    fn yaml_to_ansi(s: &str) -> ansi_term::Color {
+        serde_any::from_str::<Wrapper>(&format!("color: {}", s), serde_any::Format::Yaml)
+            .unwrap()
+            .color
+            .to_ansi_color()
+    }
+
+    #[test]
+    fn color_from_toml() {
+        assert_eq!(toml_to_ansi("\"red\""), ansi_term::Color::Red);
+        assert_eq!(toml_to_ansi("\"green\""), ansi_term::Color::Green);
+        assert_eq!(toml_to_ansi("10"), ansi_term::Color::Fixed(10));
+        assert_eq!(toml_to_ansi("110"), ansi_term::Color::Fixed(110));
+        assert_eq!(
+            toml_to_ansi("[10, 20, 30]"),
+            ansi_term::Color::RGB(10, 20, 30)
+        );
+        assert_eq!(toml_to_ansi("\"maroon\""), ansi_term::Color::RGB(128, 0, 0));
+        assert_eq!(
+            toml_to_ansi("\"steelblue\""),
+            ansi_term::Color::RGB(70, 130, 180)
+        );
+        assert_eq!(
+            toml_to_ansi("\"#4682B4\""),
+            ansi_term::Color::RGB(70, 130, 180)
+        );
+    }
+
+    #[test]
+    fn color_from_yaml() {
+        assert_eq!(yaml_to_ansi("\"red\""), ansi_term::Color::Red);
+        assert_eq!(yaml_to_ansi("\"green\""), ansi_term::Color::Green);
+        assert_eq!(yaml_to_ansi("10"), ansi_term::Color::Fixed(10));
+        assert_eq!(yaml_to_ansi("110"), ansi_term::Color::Fixed(110));
+        assert_eq!(
+            yaml_to_ansi("[10, 20, 30]"),
+            ansi_term::Color::RGB(10, 20, 30)
+        );
+        assert_eq!(yaml_to_ansi("\"maroon\""), ansi_term::Color::RGB(128, 0, 0));
+        assert_eq!(
+            yaml_to_ansi("\"steelblue\""),
+            ansi_term::Color::RGB(70, 130, 180)
+        );
+        assert_eq!(
+            yaml_to_ansi("\"#4682B4\""),
+            ansi_term::Color::RGB(70, 130, 180)
+        );
+    }
+
+    #[test]
+    fn style_from_toml() {
+        let toml = "foreground = \"#102030\"\nbackground = 3\ndimmed = true\nbold = true";
+        let actual = serde_any::from_str::<Style>(toml, serde_any::Format::Toml).unwrap();
+        let expected = Style {
+            dimmed: true,
+            bold: true,
+            foreground: Some(Color::Named("#102030".to_string())),
+            background: Some(Color::Fixed(3)),
+            ..Style::default()
+        };
+
+        assert_eq!(actual, expected);
+    }
+}
