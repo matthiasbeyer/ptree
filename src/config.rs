@@ -1,12 +1,13 @@
 use directories::BaseDirs;
-use serde_any::{from_file, to_file};
+use serde_any::{from_file, from_file_stem};
 
 #[cfg(feature = "ansi")]
 use isatty::stdout_isatty;
 
-use style::{Color, Style};
+use style::Style;
 
 use std::fmt::Display;
+use std::env;
 
 ///
 /// Configuration option controlling when output styling is used
@@ -52,7 +53,6 @@ impl Default for PrintConfig {
             chars: UTF_CHARS.into(),
             branch_style: Style {
                 dimmed: true,
-                foreground: Some(Color::Fixed(10)),
                 ..Style::default()
             },
             leaf_style: Style::default(),
@@ -74,24 +74,18 @@ impl PrintConfig {
     }
 
     fn load_from_config_file() -> Option<PrintConfig> {
-        let base_path = BaseDirs::new()?.config_dir().join("ptree.yaml");
-        let config = match from_file(&base_path) {
-            Ok(c) => c,
-            Err(e) => {
-                eprintln!("Error: {}, base_path = {}", e, base_path.display());
-                return None;
-            }
-        };
-        Some(config)
+        if let Ok(p) = env::var("PTREE_CONFIG") {
+            from_file(p).ok()
+        } else {
+            from_file_stem(BaseDirs::new()?.config_dir().join("ptree")).ok()
+        }
     }
 
     ///
     /// Load print configuration from a configuration file
     ///
     pub fn load() -> PrintConfig {
-        let c = Self::load_from_config_file().unwrap_or_else(Default::default);
-        to_file("test.yaml", &c).unwrap();
-        c
+        Self::load_from_config_file().unwrap_or_else(Default::default)
     }
 
     ///
