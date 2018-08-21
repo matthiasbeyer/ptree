@@ -15,15 +15,20 @@ appveyor = { repository = "Noughmad/ptree", service = "gitlab" }
 codecov = { repository = "Noughmad/ptree", service = "gitlab" }
 
 [features]
-default = ["petgraph", "ansi", "serde"]
-ansi = ["ansi_term", "isatty"]
-serde = ["serde-value"]
+default = ["petgraph", "ansi", "value"]
+ansi = ["ansi_term", "isatty", "tint"]
+value = ["serde-value"]
 
 [dependencies]
 petgraph = { version = "0.4", optional = true }
 ansi_term = { version = "0.11", optional = true }
 isatty = { version = "0.1", optional = true }
+tint = { version = "1.0", optional = true }
 serde-value = { version = "0.5", optional = true }
+serde = "1.0"
+serde_derive = "1.0"
+serde_any = "0.5"
+directories = "1.0"
 
 [dev-dependencies]
 serde_any = "0.5"

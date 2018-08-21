@@ -1,4 +1,4 @@
-use config::PrintConfig;
+use style::Style;
 
 use std::io;
 use std::borrow::Cow;
@@ -20,13 +20,13 @@ pub trait TreeItem: Clone {
     /// The function returns an `io::Result<()>`, so calls to `f.write()` and `write!`
     /// can be chained with `?`.
     ///
-    /// The provided `config` may be used for formatting hints.
-    /// Usually, everything printed should be run through `PrintConfig::paint_leaf()`.
+    /// The provided `style` may be used for formatting hints.
+    /// Usually, everything printed should be run through `Style::paint()`.
     /// However, this is not enforced, and custom implementations may choose to format
     /// only parts of the output, apply its own formatting in combination with the provided
     /// config, or ignore formatting altogether.
     ///
-    fn write_self<W: io::Write>(&self, f: &mut W, config: &PrintConfig) -> io::Result<()>;
+    fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()>;
 
     ///
     /// Retrieve a list of this item's children
@@ -53,8 +53,8 @@ pub struct StringItem {
 impl TreeItem for StringItem {
     type Child = Self;
 
-    fn write_self<W: io::Write>(&self, f: &mut W, config: &PrintConfig) -> io::Result<()> {
-        write!(f, "{}", config.paint_leaf(self.text.clone()))
+    fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()> {
+        write!(f, "{}", style.paint(&self.text))
     }
 
     fn children(&self) -> Cow<[Self::Child]> {

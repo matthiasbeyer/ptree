@@ -1,6 +1,7 @@
 use item::TreeItem;
 use print_tree::{print_tree, write_tree_with};
 use config::PrintConfig;
+use style::Style;
 
 use std::io;
 use std::borrow::Cow;
@@ -19,9 +20,9 @@ where
 {
     type Child = Self;
 
-    fn write_self<W: io::Write>(&self, f: &mut W, config: &PrintConfig) -> io::Result<()> {
+    fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()> {
         if let Some(w) = self.0.node_weight(self.1) {
-            write!(f, "{}", config.paint_leaf(w.to_string()))
+            write!(f, "{}", style.paint(w))
         } else {
             Ok(())
         }
