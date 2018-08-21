@@ -8,11 +8,17 @@ use style::{Color, Style};
 
 use std::fmt::Display;
 
+///
+/// Configuration option controlling when output styling is used
+///
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum StyleWhen {
+    /// Never style output
     Never,
+    /// Always style output
     Always,
+    /// Style output only when printing to a TTY
     Tty,
 }
 
@@ -28,9 +34,8 @@ pub struct PrintConfig {
     pub max_depth: u32,
     /// Indentation size. The default value is 3.
     pub indent_size: usize,
-
+    /// Control when output is styled
     pub style_when: StyleWhen,
-
     /// Characters used to print indentation lines or "branches" of the tree
     pub chars: IndentChars,
     /// ANSI style used for printing the indentation lines ("branches")
@@ -80,12 +85,18 @@ impl PrintConfig {
         Some(config)
     }
 
+    ///
+    /// Load print configuration from a configuration file
+    ///
     pub fn load() -> PrintConfig {
         let c = Self::load_from_config_file().unwrap_or_else(Default::default);
         to_file("test.yaml", &c).unwrap();
         c
     }
 
+    ///
+    /// Checks if output to a writer should be styled
+    ///
     pub fn should_style_output(&self, output_is_stdout: bool) -> bool {
         if cfg!(feature = "ansi") {
             match self.style_when {

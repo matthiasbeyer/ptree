@@ -156,6 +156,9 @@ pub mod builder;
 ///
 pub mod config;
 
+///
+/// Structures to control terminal colors and styles
+///
 pub mod style;
 
 ///

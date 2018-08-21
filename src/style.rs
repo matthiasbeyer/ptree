@@ -5,6 +5,9 @@ use ansi_term;
 #[cfg(feature = "ansi")]
 use tint;
 
+///
+/// Terminal output style
+///
 #[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Style {
@@ -131,6 +134,15 @@ impl Color {
 }
 
 impl Style {
+    ///
+    /// Paints `input` according to this style.
+    ///
+    /// If the `"ansi"` feature is enabled, this function uses
+    /// `ansi_term` to style text.
+    ///
+    /// If the `"ansi"` feature is disabled, this function
+    /// always returns the output unchanged.
+    ///
     pub fn paint(&self, input: impl Display) -> impl Display {
         #[cfg(feature = "ansi")]
         {
