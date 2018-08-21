@@ -32,14 +32,14 @@
 //! ```
 //! # use std::collections::HashMap;
 //! # use std::{io, borrow::Cow};
-//! # use ptree::{print_tree, TreeItem, PrintConfig};
+//! # use ptree::{print_tree, TreeItem, Style};
 //! #[derive(Clone)]
 //! struct MyCustomTree {}
 //!
 //! impl TreeItem for MyCustomTree {
 //!     type Child = Self;
-//!     fn write_self<W: io::Write>(&self, f: &mut W, config: &PrintConfig) -> io::Result<()> {
-//!         write!(f, "{}", config.paint_leaf("My custom tree"))
+//!     fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()> {
+//!         write!(f, "{}", style.paint("My custom tree"))
 //!     }
 //!     fn children(&self) -> Cow<[Self::Child]> {
 //!         Cow::from(vec![])
@@ -60,14 +60,11 @@
 //! ## Output formatting
 //!
 //! ```
-//! # extern crate ptree;
-//! # extern crate ansi_term;
-//! #
 //! # use std::collections::HashMap;
 //! # use std::io;
 //! # use ptree::{print_tree_with, TreeBuilder, PrintConfig};
 //! # use ptree::config::UTF_CHARS_BOLD;
-//! # use ansi_term::{Color, Style};
+//! # use ptree::{Color, Style};
 //! # fn main() -> Result<(), io::Error> {
 //! // Build a tree using a TreeBuilder
 //! let tree = TreeBuilder::new("tree".to_string())
@@ -77,9 +74,17 @@
 //! // Set up the print configuration
 //! let config = {
 //!     let mut config = PrintConfig::for_stdout();
-//!     config.branch_style = Style::new().fg(Color::Red).on(Color::Yellow).dimmed();
-//!     config.leaf_style = Style::new().bold();
-//!     config.chars = UTF_CHARS_BOLD;
+//!     config.branch_style = Style {
+//!         foreground: Some(Color::Red),
+//!         background: Some(Color::Yellow),
+//!         dimmed: true,
+//!         ..Style::default()
+//!     };
+//!     config.leaf_style = Style {
+//!         bold: true,
+//!         ..Style::default()
+//!     };
+//!     config.chars = UTF_CHARS_BOLD.into();
 //!     config.indent_size = 4;
 //!     config
 //! };
@@ -124,9 +129,17 @@ extern crate petgraph;
 extern crate ansi_term;
 #[cfg(feature = "ansi")]
 extern crate isatty;
+#[cfg(feature = "ansi")]
+extern crate tint;
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "value")]
 extern crate serde_value;
+
+extern crate directories;
+extern crate serde;
+extern crate serde_any;
+#[macro_use]
+extern crate serde_derive;
 
 ///
 /// Contains the `TreeItem` trait
@@ -142,6 +155,8 @@ pub mod builder;
 /// Structures to control the output formatting
 ///
 pub mod config;
+
+pub mod style;
 
 ///
 /// Functions for printing trees to standard output or to custom writers
@@ -169,3 +184,4 @@ pub use print_tree::{print_tree, print_tree_with, write_tree, write_tree_with};
 pub use builder::TreeBuilder;
 pub use item::TreeItem;
 pub use config::{IndentChars, PrintConfig};
+pub use style::{Color, Style};

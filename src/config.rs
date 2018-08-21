@@ -1,46 +1,62 @@
-#[cfg(feature = "ansi")]
-use ansi_term::Style;
+use directories::BaseDirs;
+use serde_any::{from_file, to_file};
+
 #[cfg(feature = "ansi")]
 use isatty::stdout_isatty;
 
+use style::{Color, Style};
+
 use std::fmt::Display;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum StyleWhen {
+    Never,
+    Always,
+    Tty,
+}
 
 ///
 /// Structure controlling the print output formatting
 ///
-#[derive(Clone, Debug, PartialEq)]
-pub struct PrintConfig<'a> {
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct PrintConfig {
     /// Maximum recursion depth when printing
     ///
     /// The default is infinity, i.e. there is no recursion limit.
     pub max_depth: u32,
     /// Indentation size. The default value is 3.
     pub indent_size: usize,
+
+    pub style_when: StyleWhen,
+
     /// Characters used to print indentation lines or "branches" of the tree
-    pub chars: IndentChars<'a>,
+    pub chars: IndentChars,
     /// ANSI style used for printing the indentation lines ("branches")
-    #[cfg(feature = "ansi")]
     pub branch_style: Style,
     /// ANSI style used for printing the item text ("leaves")
-    #[cfg(feature = "ansi")]
     pub leaf_style: Style,
 }
 
-impl<'a> Default for PrintConfig<'a> {
-    fn default() -> PrintConfig<'a> {
+impl Default for PrintConfig {
+    fn default() -> PrintConfig {
         PrintConfig {
             max_depth: u32::max_value(),
             indent_size: 3,
-            chars: UTF_CHARS,
-            #[cfg(feature = "ansi")]
-            branch_style: Style::new(),
-            #[cfg(feature = "ansi")]
-            leaf_style: Style::new(),
+            chars: UTF_CHARS.into(),
+            branch_style: Style {
+                dimmed: true,
+                foreground: Some(Color::Fixed(10)),
+                ..Style::default()
+            },
+            leaf_style: Style::default(),
+            style_when: StyleWhen::Tty,
         }
     }
 }
 
-impl<'a> PrintConfig<'a> {
+impl PrintConfig {
     ///
     /// Create a default `PrintConfig` for printing to standard output
     ///
@@ -48,24 +64,41 @@ impl<'a> PrintConfig<'a> {
     /// If it is, and ANSI formatting is enabled, the branches will be dimmed by default.
     /// If the output is not a TTY, this is equivalent to `PrintConfig::default()`.
     ///
-    pub fn for_stdout() -> PrintConfig<'a> {
-        PrintConfig {
-            max_depth: u32::max_value(),
-            indent_size: 3,
-            chars: UTF_CHARS,
-            #[cfg(feature = "ansi")]
-            branch_style: if stdout_isatty() {
-                Style::new().dimmed()
-            } else {
-                Style::new()
-            },
-            #[cfg(feature = "ansi")]
-            leaf_style: Style::new(),
+    pub fn for_stdout() -> PrintConfig {
+        Default::default()
+    }
+
+    fn load_from_config_file() -> Option<PrintConfig> {
+        let base_path = BaseDirs::new()?.config_dir().join("ptree.yaml");
+        let config = match from_file(&base_path) {
+            Ok(c) => c,
+            Err(e) => {
+                eprintln!("Error: {}, base_path = {}", e, base_path.display());
+                return None;
+            }
+        };
+        Some(config)
+    }
+
+    pub fn load() -> PrintConfig {
+        let c = Self::load_from_config_file().unwrap_or_else(Default::default);
+        to_file("test.yaml", &c).unwrap();
+        c
+    }
+
+    pub fn should_style_output(&self, output_is_stdout: bool) -> bool {
+        if cfg!(feature = "ansi") {
+            match self.style_when {
+                StyleWhen::Always => true,
+                #[cfg(feature = "ansi")]
+                StyleWhen::Tty => output_is_stdout && stdout_isatty(),
+                _ => false,
+            }
+        } else {
+            false
         }
     }
-}
 
-impl<'a> PrintConfig<'a> {
     ///
     /// Formats `input` according to the branch style
     ///
@@ -73,11 +106,7 @@ impl<'a> PrintConfig<'a> {
     /// Without that feature it returns the input unchanged.
     ///
     pub fn paint_branch(&self, input: impl Display) -> impl Display {
-        #[cfg(feature = "ansi")]
-        return self.branch_style.paint(input.to_string());
-
-        #[cfg(not(feature = "ansi"))]
-        return input;
+        self.branch_style.paint(input)
     }
 
     ///
@@ -87,11 +116,41 @@ impl<'a> PrintConfig<'a> {
     /// Without that feature it returns the input unchanged.
     ///
     pub fn paint_leaf(&self, input: impl Display) -> impl Display {
-        #[cfg(feature = "ansi")]
-        return self.leaf_style.paint(input.to_string());
+        self.leaf_style.paint(input)
+    }
+}
 
-        #[cfg(not(feature = "ansi"))]
-        return input;
+fn get_default_empty_string() -> String {
+    " ".to_string()
+}
+
+///
+/// Set of characters use to draw indentation lines (branches)
+///
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct IndentChars {
+    /// Character for pointing down and right (`├`).
+    pub down_and_right: String,
+    /// Character for pointing straight down (`|`).
+    pub down: String,
+    /// Character for turning from down to right (`└`).
+    pub turn_right: String,
+    /// Character for pointing right (`─`).
+    pub right: String,
+    /// Empty character (` `).
+    #[serde(default = "get_default_empty_string")]
+    pub empty: String,
+}
+
+impl From<StaticIndentChars> for IndentChars {
+    fn from(s: StaticIndentChars) -> IndentChars {
+        IndentChars {
+            down_and_right: s.down_and_right.to_string(),
+            down: s.down.to_string(),
+            turn_right: s.turn_right.to_string(),
+            right: s.right.to_string(),
+            empty: s.empty.to_string(),
+        }
     }
 }
 
@@ -99,17 +158,17 @@ impl<'a> PrintConfig<'a> {
 /// Set of characters use to draw indentation lines (branches)
 ///
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct IndentChars<'a> {
+pub struct StaticIndentChars {
     /// Character for pointing down and right (`├`).
-    pub down_and_right: &'a str,
+    pub down_and_right: &'static str,
     /// Character for pointing straight down (`|`).
-    pub down: &'a str,
+    pub down: &'static str,
     /// Character for turning from down to right (`└`).
-    pub turn_right: &'a str,
+    pub turn_right: &'static str,
     /// Character for pointing right (`─`).
-    pub right: &'a str,
+    pub right: &'static str,
     /// Empty character (` `).
-    pub empty: &'a str,
+    pub empty: &'static str,
 }
 
 ///
@@ -117,7 +176,7 @@ pub struct IndentChars<'a> {
 ///
 /// This is the character used in the Linux command `tree --charset=ascii`.
 ///
-pub const ASCII_CHARS_TICK: IndentChars<'static> = IndentChars {
+pub const ASCII_CHARS_TICK: StaticIndentChars = StaticIndentChars {
     down_and_right: "|",
     down: "|",
     turn_right: "`",
@@ -128,7 +187,7 @@ pub const ASCII_CHARS_TICK: IndentChars<'static> = IndentChars {
 ///
 /// ASCII indentation characters, using a plus (`+`) for turning right
 ///
-pub const ASCII_CHARS_PLUS: IndentChars<'static> = IndentChars {
+pub const ASCII_CHARS_PLUS: StaticIndentChars = StaticIndentChars {
     down_and_right: "+",
     down: "|",
     turn_right: "+",
@@ -141,7 +200,7 @@ pub const ASCII_CHARS_PLUS: IndentChars<'static> = IndentChars {
 ///
 /// This is the character used in the Linux command `tree`.
 ///
-pub const UTF_CHARS: IndentChars<'static> = IndentChars {
+pub const UTF_CHARS: StaticIndentChars = StaticIndentChars {
     down_and_right: "├",
     down: "│",
     turn_right: "└",
@@ -152,7 +211,7 @@ pub const UTF_CHARS: IndentChars<'static> = IndentChars {
 ///
 /// UTF-8 indentation characters, using double box-drawing characters
 ///
-pub const UTF_CHARS_DOUBLE: IndentChars<'static> = IndentChars {
+pub const UTF_CHARS_DOUBLE: StaticIndentChars = StaticIndentChars {
     down_and_right: "╠",
     down: "║",
     turn_right: "╚",
@@ -163,7 +222,7 @@ pub const UTF_CHARS_DOUBLE: IndentChars<'static> = IndentChars {
 ///
 /// UTF-8 indentation characters, using heavy box-drawing characters
 ///
-pub const UTF_CHARS_BOLD: IndentChars<'static> = IndentChars {
+pub const UTF_CHARS_BOLD: StaticIndentChars = StaticIndentChars {
     down_and_right: "┣",
     down: "┃",
     turn_right: "┗",
@@ -174,7 +233,7 @@ pub const UTF_CHARS_BOLD: IndentChars<'static> = IndentChars {
 ///
 /// UTF-8 indentation characters, using dashed box-drawing characters
 ///
-pub const UTF_CHARS_DASHED: IndentChars<'static> = IndentChars {
+pub const UTF_CHARS_DASHED: StaticIndentChars = StaticIndentChars {
     down_and_right: "├",
     down: "┆",
     turn_right: "└",

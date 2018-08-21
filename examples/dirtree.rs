@@ -1,6 +1,6 @@
 extern crate ptree;
 
-use ptree::{TreeItem, PrintConfig};
+use ptree::{Style, TreeItem};
 
 use std::env;
 use std::path::PathBuf;
@@ -13,9 +13,9 @@ pub struct PathItem(pub PathBuf);
 impl TreeItem for PathItem {
     type Child = Self;
 
-    fn write_self<W: io::Write>(&self, f: &mut W, config: &PrintConfig) -> io::Result<()> {
+    fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()> {
         if let Some(n) = self.0.file_name() {
-            write!(f, "{}", config.paint_leaf(n.to_string_lossy()))
+            write!(f, "{}", style.paint(n.to_string_lossy()))
         } else {
             Ok(())
         }
@@ -34,7 +34,6 @@ impl TreeItem for PathItem {
         Cow::from(v)
     }
 }
-
 
 fn main() {
     let dir = PathItem(env::current_dir().expect("Unable to get current directory"));

@@ -1,8 +1,6 @@
-extern crate ansi_term;
 extern crate ptree;
 
-use ptree::{print_tree_with, PrintConfig, TreeBuilder, config::UTF_CHARS_BOLD};
-use ansi_term::{Color, Style};
+use ptree::{print_tree_with, Color, PrintConfig, Style, TreeBuilder, config::UTF_CHARS_BOLD};
 
 fn main() {
     let tree = TreeBuilder::new("house".to_string())
@@ -31,9 +29,17 @@ fn main() {
 
     let config = {
         let mut config = PrintConfig::for_stdout();
-        config.branch_style = Style::new().fg(Color::Red).on(Color::Yellow).dimmed();
-        config.leaf_style = Style::new().bold();
-        config.chars = UTF_CHARS_BOLD;
+        config.branch_style = Style {
+            foreground: Some(Color::Red),
+            background: Some(Color::Yellow),
+            dimmed: true,
+            ..Style::default()
+        };
+        config.leaf_style = Style {
+            bold: true,
+            ..Style::default()
+        };
+        config.chars = UTF_CHARS_BOLD.into();
         config.indent_size = 4;
         config
     };

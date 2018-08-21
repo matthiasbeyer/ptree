@@ -31,20 +31,20 @@ struct Opt {
     branch_style: Option<Style>,
 
     #[structopt(short = "c", long = "character-set", parse(from_str = "chars_from_str"))]
-    character_set: Option<ptree::IndentChars<'static>>,
+    character_set: Option<ptree::IndentChars>,
 
     #[structopt(short = "i", long = "indent")]
     indent: Option<usize>,
 }
 
-fn chars_from_str(s: &&str) -> ptree::IndentChars<'static> {
+fn chars_from_str(s: &&str) -> ptree::IndentChars {
     match &s.to_lowercase()[..] {
-        "ascii" | "ascii-plus" => config::ASCII_CHARS_PLUS,
-        "ascii-tick" => config::ASCII_CHARS_TICK,
-        "utf" => config::UTF_CHARS,
-        "utf-bold" => config::UTF_CHARS_BOLD,
-        "utf-double" => config::UTF_CHARS_DOUBLE,
-        _ => config::UTF_CHARS,
+        "ascii" | "ascii-plus" => config::ASCII_CHARS_PLUS.into(),
+        "ascii-tick" => config::ASCII_CHARS_TICK.into(),
+        "utf" => config::UTF_CHARS.into(),
+        "utf-bold" => config::UTF_CHARS_BOLD.into(),
+        "utf-double" => config::UTF_CHARS_DOUBLE.into(),
+        _ => config::UTF_CHARS.into(),
     }
 }
 
