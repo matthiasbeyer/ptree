@@ -1,5 +1,5 @@
 use directories::BaseDirs;
-use serde_any::{from_file, from_file_stem};
+use config;
 
 #[cfg(feature = "ansi")]
 use isatty::stdout_isatty;
@@ -32,16 +32,22 @@ pub struct PrintConfig {
     /// Maximum recursion depth when printing
     ///
     /// The default is infinity, i.e. there is no recursion limit.
+    #[serde(rename = "depth")]
     pub max_depth: u32,
     /// Indentation size. The default value is 3.
+    #[serde(rename = "indent")]
     pub indent_size: usize,
     /// Control when output is styled
+    #[serde(rename = "styled")]
     pub style_when: StyleWhen,
     /// Characters used to print indentation lines or "branches" of the tree
+    #[serde(rename = "chars")]
     pub chars: IndentChars,
     /// ANSI style used for printing the indentation lines ("branches")
+    #[serde(rename = "branch")]
     pub branch_style: Style,
     /// ANSI style used for printing the item text ("leaves")
+    #[serde(rename = "leaf")]
     pub leaf_style: Style,
 }
 
@@ -73,19 +79,26 @@ impl PrintConfig {
         Default::default()
     }
 
-    fn load_from_config_file() -> Option<PrintConfig> {
+    fn try_load() -> Option<PrintConfig> {
+        let mut settings = config::Config::default();
+
         if let Ok(p) = env::var("PTREE_CONFIG") {
-            from_file(p).ok()
+            settings.merge(config::File::with_name(&p)).ok()?;
         } else {
-            from_file_stem(BaseDirs::new()?.config_dir().join("ptree")).ok()
+            let f = BaseDirs::new()?.config_dir().join("ptree");
+            settings.merge(config::File::with_name(f.to_str()?)).ok()?;
         }
+
+        settings.merge(config::Environment::with_prefix("PTREE").separator("_")).ok()?;
+
+        Some(settings.try_into().ok()?)
     }
 
     ///
-    /// Load print configuration from a configuration file
+    /// Load print configuration from a configuration file or environment variables
     ///
     pub fn load() -> PrintConfig {
-        Self::load_from_config_file().unwrap_or_else(Default::default)
+        Self::try_load().unwrap_or_else(Default::default)
     }
 
     ///

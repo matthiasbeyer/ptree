@@ -1,6 +1,6 @@
 use item::TreeItem;
 use print_tree::{print_tree, write_tree_with};
-use config::PrintConfig;
+use print_config::PrintConfig;
 use style::Style;
 
 use std::io;

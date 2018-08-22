@@ -1,5 +1,5 @@
 use item::*;
-use config::*;
+use print_config::*;
 use style::*;
 
 use std::io;

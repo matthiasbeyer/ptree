@@ -137,9 +137,9 @@ extern crate serde_value;
 
 extern crate directories;
 extern crate serde;
-extern crate serde_any;
 #[macro_use]
 extern crate serde_derive;
+extern crate config;
 
 ///
 /// Contains the `TreeItem` trait
@@ -154,7 +154,7 @@ pub mod builder;
 ///
 /// Structures to control the output formatting
 ///
-pub mod config;
+pub mod print_config;
 
 ///
 /// Structures to control terminal colors and styles
@@ -186,5 +186,5 @@ pub mod value;
 pub use print_tree::{print_tree, print_tree_with, write_tree, write_tree_with};
 pub use builder::TreeBuilder;
 pub use item::TreeItem;
-pub use config::{IndentChars, PrintConfig};
+pub use print_config::{IndentChars, PrintConfig};
 pub use style::{Color, Style};
