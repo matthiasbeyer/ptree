@@ -63,7 +63,7 @@
 //! # use std::collections::HashMap;
 //! # use std::io;
 //! # use ptree::{print_tree_with, TreeBuilder, PrintConfig};
-//! # use ptree::config::UTF_CHARS_BOLD;
+//! # use ptree::print_config::UTF_CHARS_BOLD;
 //! # use ptree::{Color, Style};
 //! # fn main() -> Result<(), io::Error> {
 //! // Build a tree using a TreeBuilder
@@ -188,3 +188,6 @@ pub use builder::TreeBuilder;
 pub use item::TreeItem;
 pub use print_config::{IndentChars, PrintConfig};
 pub use style::{Color, Style};
+
+#[cfg(test)]
+extern crate serde_any;
