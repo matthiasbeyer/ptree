@@ -135,11 +135,11 @@ extern crate tint;
 #[cfg(feature = "value")]
 extern crate serde_value;
 
+extern crate config;
 extern crate directories;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate config;
 
 ///
 /// Contains the `TreeItem` trait
@@ -190,7 +190,7 @@ pub use print_config::{IndentChars, PrintConfig};
 pub use style::{Color, Style};
 
 #[cfg(test)]
-extern crate serde_any;
-#[cfg(test)]
 #[macro_use]
 extern crate lazy_static;
+#[cfg(test)]
+extern crate serde_any;

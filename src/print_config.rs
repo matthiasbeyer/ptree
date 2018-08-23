@@ -89,7 +89,9 @@ impl PrintConfig {
             settings.merge(config::File::with_name(f.to_str()?)).ok()?;
         }
 
-        settings.merge(config::Environment::with_prefix("PTREE").separator("_")).ok()?;
+        settings
+            .merge(config::Environment::with_prefix("PTREE").separator("_"))
+            .ok()?;
 
         Some(settings.try_into().ok()?)
     }
@@ -259,7 +261,6 @@ pub const UTF_CHARS_DASHED: StaticIndentChars = StaticIndentChars {
     empty: " ",
 };
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -293,11 +294,13 @@ mod tests {
 
         let config = load_config_from_path(path);
         assert_eq!(config.indent_size, 7);
-        assert_eq!(config.branch_style.foreground, Some(Color::Named("maroon".to_string())));
+        assert_eq!(
+            config.branch_style.foreground,
+            Some(Color::Named("maroon".to_string()))
+        );
         assert_eq!(config.branch_style.background, None);
 
         fs::remove_file(path).unwrap();
-
     }
 
     #[test]
@@ -306,13 +309,22 @@ mod tests {
         let path = "ptree.toml";
         {
             let mut f = File::create(path).unwrap();
-            writeln!(f, "indent = 5\n[leaf]\nforeground = \"green\"\nbackground = \"steelblue\"\n").unwrap();
+            writeln!(
+                f,
+                "indent = 5\n[leaf]\nforeground = \"green\"\nbackground = \"steelblue\"\n"
+            ).unwrap();
         }
 
         let config = load_config_from_path(path);
         assert_eq!(config.indent_size, 5);
-        assert_eq!(config.leaf_style.foreground, Some(Color::Named("green".to_string())));
-        assert_eq!(config.leaf_style.background, Some(Color::Named("steelblue".to_string())));
+        assert_eq!(
+            config.leaf_style.foreground,
+            Some(Color::Named("green".to_string()))
+        );
+        assert_eq!(
+            config.leaf_style.background,
+            Some(Color::Named("steelblue".to_string()))
+        );
         assert_eq!(config.branch_style.foreground, None);
         assert_eq!(config.branch_style.background, None);
 
@@ -335,8 +347,14 @@ mod tests {
         let config = load_config_from_path(path);
         assert_eq!(config.indent_size, 5);
         assert_eq!(config.max_depth, 4);
-        assert_eq!(config.leaf_style.foreground, Some(Color::Named("green".to_string())));
-        assert_eq!(config.leaf_style.background, Some(Color::Named("steelblue".to_string())));
+        assert_eq!(
+            config.leaf_style.foreground,
+            Some(Color::Named("green".to_string()))
+        );
+        assert_eq!(
+            config.leaf_style.background,
+            Some(Color::Named("steelblue".to_string()))
+        );
         assert_eq!(config.leaf_style.bold, true);
         assert_eq!(config.branch_style.foreground, None);
         assert_eq!(config.branch_style.background, None);
@@ -347,5 +365,4 @@ mod tests {
 
         fs::remove_file(path).unwrap();
     }
-
 }
