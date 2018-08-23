@@ -72,7 +72,7 @@ mod tests {
     use print_config::PrintConfig;
 
     #[test]
-    fn small_graph_output() {
+    fn small_item_output() {
         let deps = StringItem {
             text: "petgraph".to_string(),
             children: vec![
