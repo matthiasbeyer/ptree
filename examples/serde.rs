@@ -1,4 +1,3 @@
-extern crate ansi_term;
 extern crate ptree;
 extern crate serde_any;
 extern crate serde_value;
@@ -10,8 +9,8 @@ use structopt::StructOpt;
 
 use std::path::PathBuf;
 use std::fs::File;
-use ansi_term::{Color, Style};
-use ptree::config;
+use ptree::style::{Color, Style};
+use ptree::print_config;
 
 #[derive(Clone, Debug, StructOpt)]
 struct Opt {
@@ -39,44 +38,44 @@ struct Opt {
 
 fn chars_from_str(s: &&str) -> ptree::IndentChars {
     match &s.to_lowercase()[..] {
-        "ascii" | "ascii-plus" => config::ASCII_CHARS_PLUS.into(),
-        "ascii-tick" => config::ASCII_CHARS_TICK.into(),
-        "utf" => config::UTF_CHARS.into(),
-        "utf-bold" => config::UTF_CHARS_BOLD.into(),
-        "utf-double" => config::UTF_CHARS_DOUBLE.into(),
-        _ => config::UTF_CHARS.into(),
+        "ascii" | "ascii-plus" => print_config::ASCII_CHARS_PLUS.into(),
+        "ascii-tick" => print_config::ASCII_CHARS_TICK.into(),
+        "utf" => print_config::UTF_CHARS.into(),
+        "utf-bold" => print_config::UTF_CHARS_BOLD.into(),
+        "utf-double" => print_config::UTF_CHARS_DOUBLE.into(),
+        _ => print_config::UTF_CHARS.into(),
     }
 }
 
 fn style_from_str(s: &&str) -> Style {
-    let mut style = Style::new();
+    let mut style = Style::default();
 
     for i in s.split(",") {
         match &i.to_lowercase()[..] {
-            "black" => style = style.fg(Color::Black),
-            "on_black" => style = style.on(Color::Black),
-            "red" => style = style.fg(Color::Red),
-            "on_red" => style = style.on(Color::Red),
-            "green" => style = style.fg(Color::Green),
-            "on_green" => style = style.on(Color::Green),
-            "yellow" => style = style.fg(Color::Yellow),
-            "on_yellow" => style = style.on(Color::Yellow),
-            "blue" => style = style.fg(Color::Blue),
-            "on_blue" => style = style.on(Color::Blue),
-            "purple" => style = style.fg(Color::Purple),
-            "on_purple" => style = style.on(Color::Purple),
-            "cyan" => style = style.fg(Color::Cyan),
-            "on_cyan" => style = style.on(Color::Cyan),
-            "white" => style = style.fg(Color::White),
-            "on_white" => style = style.on(Color::White),
-            "bold" => style = style.bold(),
-            "dimmed" => style = style.dimmed(),
-            "italic" => style = style.italic(),
-            "underline" => style = style.underline(),
-            "blink" => style = style.blink(),
-            "reverse" => style = style.reverse(),
-            "hidden" => style = style.hidden(),
-            "strikethrough" => style = style.strikethrough(),
+            "black" => style.foreground = Some(Color::Black),
+            "on_black" => style.background = Some(Color::Black),
+            "red" => style.foreground = Some(Color::Red),
+            "on_red" => style.background = Some(Color::Red),
+            "green" => style.foreground = Some(Color::Green),
+            "on_green" => style.background = Some(Color::Green),
+            "yellow" => style.foreground = Some(Color::Yellow),
+            "on_yellow" => style.background = Some(Color::Yellow),
+            "blue" => style.foreground = Some(Color::Blue),
+            "on_blue" => style.background = Some(Color::Blue),
+            "purple" => style.foreground = Some(Color::Purple),
+            "on_purple" => style.background = Some(Color::Purple),
+            "cyan" => style.foreground = Some(Color::Cyan),
+            "on_cyan" => style.background = Some(Color::Cyan),
+            "white" => style.foreground = Some(Color::White),
+            "on_white" => style.background = Some(Color::White),
+            "bold" => style.bold = true,
+            "dimmed" => style.dimmed = true,
+            "italic" => style.italic = true,
+            "underline" => style.underline = true,
+            "blink" => style.blink = true,
+            "reverse" => style.reverse = true,
+            "hidden" => style.hidden = true,
+            "strikethrough" => style.strikethrough = true,
             _ => {}
         }
     }

@@ -1,5 +1,5 @@
 use item::TreeItem;
-use config::PrintConfig;
+use style::Style;
 
 use std::io;
 use std::borrow::Cow;
@@ -30,8 +30,8 @@ fn value_to_string(v: &Value) -> String {
 impl TreeItem for Value {
     type Child = (String, Value);
 
-    fn write_self<W: io::Write>(&self, f: &mut W, config: &PrintConfig) -> io::Result<()> {
-        write!(f, "{}", config.paint_leaf(value_to_string(self)))
+    fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()> {
+        write!(f, "{}", style.paint(value_to_string(self)))
     }
 
     fn children(&self) -> Cow<[Self::Child]> {
@@ -62,11 +62,11 @@ impl TreeItem for Value {
 impl TreeItem for (String, Value) {
     type Child = Self;
 
-    fn write_self<W: io::Write>(&self, f: &mut W, config: &PrintConfig) -> io::Result<()> {
+    fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()> {
         if self.0.is_empty() {
-            write!(f, "{}", config.paint_leaf(value_to_string(&self.1)))
+            write!(f, "{}", style.paint(value_to_string(&self.1)))
         } else {
-            write!(f, "{}", config.paint_leaf(&self.0))
+            write!(f, "{}", style.paint(&self.0))
         }
     }
 

@@ -45,7 +45,7 @@ required-features = ["petgraph"]
 
 [[example]]
 name = "serde"
-required-features = ["serde", "ansi"]
+required-features = ["value", "ansi"]
 
 [[example]]
 name = "builder"

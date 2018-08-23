@@ -174,7 +174,7 @@ pub mod print_tree;
 ///
 pub mod graph;
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "value")]
 ///
 /// Implementation of `TreeItem` for `serde_value::Value`, allowing easy printing
 /// deserialized structures from a variety of formats.
