@@ -1,5 +1,5 @@
 use item::*;
-use config::*;
+use print_config::*;
 use style::*;
 
 use std::io;
@@ -131,7 +131,7 @@ pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &P
 #[cfg(test)]
 mod tests {
     use super::*;
-    use config::PrintConfig;
+    use print_config::PrintConfig;
 
     #[test]
     fn indent_from_chars() {

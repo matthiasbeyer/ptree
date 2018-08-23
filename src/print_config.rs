@@ -1,5 +1,5 @@
 use directories::BaseDirs;
-use serde_any::{from_file, from_file_stem};
+use config;
 
 #[cfg(feature = "ansi")]
 use isatty::stdout_isatty;
@@ -32,16 +32,22 @@ pub struct PrintConfig {
     /// Maximum recursion depth when printing
     ///
     /// The default is infinity, i.e. there is no recursion limit.
+    #[serde(rename = "depth")]
     pub max_depth: u32,
     /// Indentation size. The default value is 3.
+    #[serde(rename = "indent")]
     pub indent_size: usize,
     /// Control when output is styled
+    #[serde(rename = "styled")]
     pub style_when: StyleWhen,
     /// Characters used to print indentation lines or "branches" of the tree
+    #[serde(rename = "chars")]
     pub chars: IndentChars,
     /// ANSI style used for printing the indentation lines ("branches")
+    #[serde(rename = "branch")]
     pub branch_style: Style,
     /// ANSI style used for printing the item text ("leaves")
+    #[serde(rename = "leaf")]
     pub leaf_style: Style,
 }
 
@@ -73,19 +79,28 @@ impl PrintConfig {
         Default::default()
     }
 
-    fn load_from_config_file() -> Option<PrintConfig> {
+    fn try_load() -> Option<PrintConfig> {
+        let mut settings = config::Config::default();
+
         if let Ok(p) = env::var("PTREE_CONFIG") {
-            from_file(p).ok()
+            settings.merge(config::File::with_name(&p)).ok()?;
         } else {
-            from_file_stem(BaseDirs::new()?.config_dir().join("ptree")).ok()
+            let f = BaseDirs::new()?.config_dir().join("ptree");
+            settings.merge(config::File::with_name(f.to_str()?)).ok()?;
         }
+
+        settings
+            .merge(config::Environment::with_prefix("PTREE").separator("_"))
+            .ok()?;
+
+        Some(settings.try_into().ok()?)
     }
 
     ///
-    /// Load print configuration from a configuration file
+    /// Load print configuration from a configuration file or environment variables
     ///
     pub fn load() -> PrintConfig {
-        Self::load_from_config_file().unwrap_or_else(Default::default)
+        Self::try_load().unwrap_or_else(Default::default)
     }
 
     ///
@@ -245,3 +260,109 @@ pub const UTF_CHARS_DASHED: StaticIndentChars = StaticIndentChars {
     right: "╌",
     empty: " ",
 };
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use style::Color;
+
+    use std::env;
+    use std::fs::{self, File};
+    use std::io::Write;
+    use std::sync::Mutex;
+
+    lazy_static! {
+        static ref ENV_MUTEX: Mutex<()> = Mutex::new(());
+    }
+
+    fn load_config_from_path(path: &str) -> PrintConfig {
+        env::set_var("PTREE_CONFIG", path);
+        let config = PrintConfig::load();
+        env::remove_var("PTREE_CONFIG");
+
+        config
+    }
+
+    #[test]
+    fn load_yaml_config_file() {
+        let _g = ENV_MUTEX.lock().unwrap();
+        let path = "ptree.yaml";
+        {
+            let mut f = File::create(path).unwrap();
+            writeln!(f, "indent: 7\nbranch:\n  foreground: maroon").unwrap();
+        }
+
+        let config = load_config_from_path(path);
+        assert_eq!(config.indent_size, 7);
+        assert_eq!(
+            config.branch_style.foreground,
+            Some(Color::Named("maroon".to_string()))
+        );
+        assert_eq!(config.branch_style.background, None);
+
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn load_toml_config_file() {
+        let _g = ENV_MUTEX.lock().unwrap();
+        let path = "ptree.toml";
+        {
+            let mut f = File::create(path).unwrap();
+            writeln!(
+                f,
+                "indent = 5\n[leaf]\nforeground = \"green\"\nbackground = \"steelblue\"\n"
+            ).unwrap();
+        }
+
+        let config = load_config_from_path(path);
+        assert_eq!(config.indent_size, 5);
+        assert_eq!(
+            config.leaf_style.foreground,
+            Some(Color::Named("green".to_string()))
+        );
+        assert_eq!(
+            config.leaf_style.background,
+            Some(Color::Named("steelblue".to_string()))
+        );
+        assert_eq!(config.branch_style.foreground, None);
+        assert_eq!(config.branch_style.background, None);
+
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn load_env() {
+        let _g = ENV_MUTEX.lock().unwrap();
+        let path = "ptree.toml";
+        {
+            let mut f = File::create(path).unwrap();
+            writeln!(f, "indent = 5\n[leaf]\nforeground = \"green\"\n").unwrap();
+        }
+
+        env::set_var("PTREE_LEAF_BACKGROUND", "steelblue");
+        env::set_var("PTREE_LEAF_BOLD", "true");
+        env::set_var("PTREE_DEPTH", "4");
+
+        let config = load_config_from_path(path);
+        assert_eq!(config.indent_size, 5);
+        assert_eq!(config.max_depth, 4);
+        assert_eq!(
+            config.leaf_style.foreground,
+            Some(Color::Named("green".to_string()))
+        );
+        assert_eq!(
+            config.leaf_style.background,
+            Some(Color::Named("steelblue".to_string()))
+        );
+        assert_eq!(config.leaf_style.bold, true);
+        assert_eq!(config.branch_style.foreground, None);
+        assert_eq!(config.branch_style.background, None);
+
+        env::remove_var("PTREE_LEAF_BACKGROUND");
+        env::remove_var("PTREE_LEAF_BOLD");
+        env::remove_var("PTREE_DEPTH");
+
+        fs::remove_file(path).unwrap();
+    }
+}

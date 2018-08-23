@@ -63,7 +63,7 @@
 //! # use std::collections::HashMap;
 //! # use std::io;
 //! # use ptree::{print_tree_with, TreeBuilder, PrintConfig};
-//! # use ptree::config::UTF_CHARS_BOLD;
+//! # use ptree::print_config::UTF_CHARS_BOLD;
 //! # use ptree::{Color, Style};
 //! # fn main() -> Result<(), io::Error> {
 //! // Build a tree using a TreeBuilder
@@ -135,9 +135,9 @@ extern crate tint;
 #[cfg(feature = "value")]
 extern crate serde_value;
 
+extern crate config;
 extern crate directories;
 extern crate serde;
-extern crate serde_any;
 #[macro_use]
 extern crate serde_derive;
 
@@ -154,7 +154,7 @@ pub mod builder;
 ///
 /// Structures to control the output formatting
 ///
-pub mod config;
+pub mod print_config;
 
 ///
 /// Structures to control terminal colors and styles
@@ -186,5 +186,11 @@ pub mod value;
 pub use print_tree::{print_tree, print_tree_with, write_tree, write_tree_with};
 pub use builder::TreeBuilder;
 pub use item::TreeItem;
-pub use config::{IndentChars, PrintConfig};
+pub use print_config::{IndentChars, PrintConfig};
 pub use style::{Color, Style};
+
+#[cfg(test)]
+#[macro_use]
+extern crate lazy_static;
+#[cfg(test)]
+extern crate serde_any;

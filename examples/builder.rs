@@ -1,6 +1,6 @@
 extern crate ptree;
 
-use ptree::{print_tree_with, Color, PrintConfig, Style, TreeBuilder, config::UTF_CHARS_BOLD};
+use ptree::{print_tree_with, Color, PrintConfig, Style, TreeBuilder, print_config::UTF_CHARS_BOLD};
 
 fn main() {
     let tree = TreeBuilder::new("house".to_string())
