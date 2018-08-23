@@ -191,3 +191,6 @@ pub use style::{Color, Style};
 
 #[cfg(test)]
 extern crate serde_any;
+#[cfg(test)]
+#[macro_use]
+extern crate lazy_static;

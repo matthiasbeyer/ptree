@@ -258,3 +258,64 @@ pub const UTF_CHARS_DASHED: StaticIndentChars = StaticIndentChars {
     right: "╌",
     empty: " ",
 };
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use style::Color;
+
+    use std::env;
+    use std::fs::{self, File};
+    use std::io::Write;
+    use std::sync::Mutex;
+
+    lazy_static! {
+        static ref ENV_MUTEX: Mutex<()> = Mutex::new(());
+    }
+
+    fn load_config_from_path(path: &str) -> PrintConfig {
+        let _g = ENV_MUTEX.lock().unwrap();
+        env::set_var("PTREE_CONFIG", path);
+        let config = PrintConfig::load();
+        env::remove_var("PTREE_CONFIG");
+
+        config
+    }
+
+    #[test]
+    fn load_yaml_config_file() {
+        let path = "ptree.yaml";
+        {
+            let mut f = File::create(path).unwrap();
+            writeln!(f, "indent: 7\nbranch:\n  foreground: maroon").unwrap();
+        }
+
+        let config = load_config_from_path(path);
+        assert_eq!(config.indent_size, 7);
+        assert_eq!(config.branch_style.foreground, Some(Color::Named("maroon".to_string())));
+        assert_eq!(config.branch_style.background, None);
+
+        fs::remove_file(path).unwrap();
+
+    }
+
+    #[test]
+    fn load_toml_config_file() {
+        let path = "ptree.toml";
+        {
+            let mut f = File::create(path).unwrap();
+            writeln!(f, "indent = 5\n[leaf]\nforeground = \"green\"\nbackground = \"steelblue\"\n").unwrap();
+        }
+
+        let config = load_config_from_path(path);
+        assert_eq!(config.indent_size, 5);
+        assert_eq!(config.leaf_style.foreground, Some(Color::Named("green".to_string())));
+        assert_eq!(config.leaf_style.background, Some(Color::Named("steelblue".to_string())));
+        assert_eq!(config.branch_style.foreground, None);
+        assert_eq!(config.branch_style.background, None);
+
+        fs::remove_file(path).unwrap();
+    }
+
+}
