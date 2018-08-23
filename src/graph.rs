@@ -64,3 +64,43 @@ where
 {
     write_tree_with(&(graph, start), f, config)
 }
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+    use std::str::from_utf8;
+    use super::*;
+
+    #[test]
+    fn small_graph_output() {
+        let mut deps = Graph::<&str, &str>::new();
+        let pg = deps.add_node("petgraph");
+        let fb = deps.add_node("fixedbitset");
+        let qc = deps.add_node("quickcheck");
+        let rand = deps.add_node("rand");
+        let libc = deps.add_node("libc");
+        deps.extend_with_edges(&[(pg, fb), (pg, qc), (qc, rand), (rand, libc), (qc, libc)]);
+
+        let config = PrintConfig {
+            indent_size: 4,
+            leaf_style: Style::default(),
+            branch_style: Style::default(),
+            ..PrintConfig::default()
+        };
+
+        let mut cursor: Cursor<Vec<u8>> = Cursor::new(Vec::new());
+
+        write_graph_with(&deps, pg, &mut cursor, &config).unwrap();
+
+        let data = cursor.into_inner();
+        let expected = "\
+            petgraph\n\
+            ├── quickcheck\n\
+            │   ├── libc\n\
+            │   └── rand\n\
+            │       └── libc\n\
+            └── fixedbitset\n\
+        ";
+        assert_eq!(from_utf8(&data).unwrap(), expected);
+    }
+}

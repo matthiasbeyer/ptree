@@ -61,3 +61,66 @@ impl TreeItem for StringItem {
         Cow::from(&self.children[..])
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+    use std::str::from_utf8;
+    use super::*;
+
+    use print_tree::write_tree_with;
+    use print_config::PrintConfig;
+
+    #[test]
+    fn small_graph_output() {
+        let deps = StringItem {
+            text: "petgraph".to_string(),
+            children: vec![
+                StringItem {
+                    text: "quickcheck".to_string(),
+                    children: vec![
+                        StringItem {
+                            text: "libc".to_string(),
+                            children: vec![],
+                        },
+                        StringItem {
+                            text: "rand".to_string(),
+                            children: vec![
+                                StringItem {
+                                    text: "libc".to_string(),
+                                    children: vec![],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                StringItem {
+                    text: "fixedbitset".to_string(),
+                    children: vec![],
+                },
+            ],
+        };
+
+        let config = PrintConfig {
+            indent_size: 4,
+            leaf_style: Style::default(),
+            branch_style: Style::default(),
+            ..PrintConfig::default()
+        };
+
+        let mut cursor: Cursor<Vec<u8>> = Cursor::new(Vec::new());
+
+        write_tree_with(&deps, &mut cursor, &config).unwrap();
+
+        let data = cursor.into_inner();
+        let expected = "\
+            petgraph\n\
+            ├── quickcheck\n\
+            │   ├── libc\n\
+            │   └── rand\n\
+            │       └── libc\n\
+            └── fixedbitset\n\
+        ";
+        assert_eq!(from_utf8(&data).unwrap(), expected);
+    }
+}
