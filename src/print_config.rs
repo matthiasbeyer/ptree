@@ -275,7 +275,6 @@ mod tests {
     }
 
     fn load_config_from_path(path: &str) -> PrintConfig {
-        let _g = ENV_MUTEX.lock().unwrap();
         env::set_var("PTREE_CONFIG", path);
         let config = PrintConfig::load();
         env::remove_var("PTREE_CONFIG");
@@ -285,6 +284,7 @@ mod tests {
 
     #[test]
     fn load_yaml_config_file() {
+        let _g = ENV_MUTEX.lock().unwrap();
         let path = "ptree.yaml";
         {
             let mut f = File::create(path).unwrap();
@@ -302,6 +302,7 @@ mod tests {
 
     #[test]
     fn load_toml_config_file() {
+        let _g = ENV_MUTEX.lock().unwrap();
         let path = "ptree.toml";
         {
             let mut f = File::create(path).unwrap();
@@ -314,6 +315,35 @@ mod tests {
         assert_eq!(config.leaf_style.background, Some(Color::Named("steelblue".to_string())));
         assert_eq!(config.branch_style.foreground, None);
         assert_eq!(config.branch_style.background, None);
+
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn load_env() {
+        let _g = ENV_MUTEX.lock().unwrap();
+        let path = "ptree.toml";
+        {
+            let mut f = File::create(path).unwrap();
+            writeln!(f, "indent = 5\n[leaf]\nforeground = \"green\"\n").unwrap();
+        }
+
+        env::set_var("PTREE_LEAF_BACKGROUND", "steelblue");
+        env::set_var("PTREE_LEAF_BOLD", "true");
+        env::set_var("PTREE_DEPTH", "4");
+
+        let config = load_config_from_path(path);
+        assert_eq!(config.indent_size, 5);
+        assert_eq!(config.max_depth, 4);
+        assert_eq!(config.leaf_style.foreground, Some(Color::Named("green".to_string())));
+        assert_eq!(config.leaf_style.background, Some(Color::Named("steelblue".to_string())));
+        assert_eq!(config.leaf_style.bold, true);
+        assert_eq!(config.branch_style.foreground, None);
+        assert_eq!(config.branch_style.background, None);
+
+        env::remove_var("PTREE_LEAF_BACKGROUND");
+        env::remove_var("PTREE_LEAF_BOLD");
+        env::remove_var("PTREE_DEPTH");
 
         fs::remove_file(path).unwrap();
     }
