@@ -114,13 +114,13 @@ mod tests {
 
         let data = cursor.into_inner();
         let expected = "\
-            petgraph\n\
-            ├── quickcheck\n\
-            │   ├── libc\n\
-            │   └── rand\n\
-            │       └── libc\n\
-            └── fixedbitset\n\
-        ";
+                        petgraph\n\
+                        ├── quickcheck\n\
+                        │   ├── libc\n\
+                        │   └── rand\n\
+                        │       └── libc\n\
+                        └── fixedbitset\n\
+                        ";
         assert_eq!(from_utf8(&data).unwrap(), expected);
     }
 }

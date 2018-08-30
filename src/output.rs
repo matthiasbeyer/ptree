@@ -13,7 +13,7 @@ struct Indent {
 
 impl Indent {
     pub fn from_config(config: &PrintConfig) -> Indent {
-        Self::from_chars(config.indent_size, &config.chars)
+        Self::from_chars(config.indent, &config.chars)
     }
 
     pub fn from_chars(indent_size: usize, chars: &IndentChars) -> Indent {
@@ -45,7 +45,7 @@ fn print_item<T: TreeItem, W: io::Write>(
     item.write_self(f, leaf_style)?;
     writeln!(f, "")?;
 
-    if level < config.max_depth {
+    if level < config.depth {
         let children = item.children();
         if let Some((last_child, children)) = children.split_last() {
             let rp = child_prefix.clone() + &chars.regular_prefix;
@@ -82,7 +82,7 @@ pub fn print_tree<T: TreeItem>(item: &T) -> io::Result<()> {
 /// Print the tree `item` to standard output using custom formatting
 pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Result<()> {
     let style = if config.should_style_output(true) {
-        config.leaf_style.clone()
+        config.leaf.clone()
     } else {
         Style::default()
     };
@@ -110,7 +110,7 @@ pub fn write_tree<T: TreeItem, W: io::Write>(item: &T, mut f: W) -> io::Result<(
 /// Write the tree `item` to writer `f` using custom formatting
 pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &PrintConfig) -> io::Result<()> {
     let style = if config.should_style_output(true) {
-        config.leaf_style.clone()
+        config.leaf.clone()
     } else {
         Style::default()
     };

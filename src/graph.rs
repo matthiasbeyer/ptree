@@ -1,5 +1,5 @@
 use item::TreeItem;
-use print_tree::{print_tree, write_tree_with};
+use output::{print_tree, write_tree_with};
 use print_config::PrintConfig;
 use style::Style;
 
@@ -94,13 +94,13 @@ mod tests {
 
         let data = cursor.into_inner();
         let expected = "\
-            petgraph\n\
-            ├── quickcheck\n\
-            │   ├── libc\n\
-            │   └── rand\n\
-            │       └── libc\n\
-            └── fixedbitset\n\
-        ";
+                        petgraph\n\
+                        ├── quickcheck\n\
+                        │   ├── libc\n\
+                        │   └── rand\n\
+                        │       └── libc\n\
+                        └── fixedbitset\n\
+                        ";
         assert_eq!(from_utf8(&data).unwrap(), expected);
     }
 }

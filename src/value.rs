@@ -109,12 +109,12 @@ mod tests {
     #[test]
     fn toml_value_output() {
         let toml = "\
-            configuration = [\"toml\", \"yaml\", \"json\", \"environment\"]\n\
-            charsets = [\"utf\", \"ascii\"]\n\
-            \n\
-            default_depth = 3\n\
-            \n\
-        ";
+                    configuration = [\"toml\", \"yaml\", \"json\", \"environment\"]\n\
+                    charsets = [\"utf\", \"ascii\"]\n\
+                    \n\
+                    default_depth = 3\n\
+                    \n\
+                    ";
 
         let value: Value = serde_any::from_str(toml, serde_any::Format::Toml).unwrap();
         let tree = ("toml".to_string(), value);
@@ -132,17 +132,17 @@ mod tests {
 
         let data = cursor.into_inner();
         let expected = "\
-            toml\n\
-            ├── charsets\n\
-            │   ├── utf\n\
-            │   └── ascii\n\
-            ├── configuration\n\
-            │   ├── toml\n\
-            │   ├── yaml\n\
-            │   ├── json\n\
-            │   └── environment\n\
-            └── default_depth = 3\n\
-        ";
+                        toml\n\
+                        ├── charsets\n\
+                        │   ├── utf\n\
+                        │   └── ascii\n\
+                        ├── configuration\n\
+                        │   ├── toml\n\
+                        │   ├── yaml\n\
+                        │   ├── json\n\
+                        │   └── environment\n\
+                        └── default_depth = 3\n\
+                        ";
         assert_eq!(from_utf8(&data).unwrap(), expected);
     }
 }

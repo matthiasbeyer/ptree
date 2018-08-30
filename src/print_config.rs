@@ -1,3 +1,7 @@
+//!
+//! Output formatting is configured through the [`PrintConfig`] structure.
+//!
+
 use directories::BaseDirs;
 use config;
 
@@ -32,37 +36,34 @@ pub struct PrintConfig {
     /// Maximum recursion depth when printing
     ///
     /// The default is infinity, i.e. there is no recursion limit.
-    #[serde(rename = "depth")]
-    pub max_depth: u32,
+    pub depth: u32,
     /// Indentation size. The default value is 3.
-    #[serde(rename = "indent")]
-    pub indent_size: usize,
-    /// Control when output is styled
-    #[serde(rename = "styled")]
-    pub style_when: StyleWhen,
+    pub indent: usize,
+    /// Control when output is styled.
+    ///
+    /// The default value is [`StyleWhen::Tty`], meaning that ANSI styles are only used for printing to the standard
+    /// output, and only when the standard output is a TTY.
+    pub styled: StyleWhen,
     /// Characters used to print indentation lines or "branches" of the tree
-    #[serde(rename = "chars")]
     pub chars: IndentChars,
     /// ANSI style used for printing the indentation lines ("branches")
-    #[serde(rename = "branch")]
-    pub branch_style: Style,
+    pub branch: Style,
     /// ANSI style used for printing the item text ("leaves")
-    #[serde(rename = "leaf")]
-    pub leaf_style: Style,
+    pub leaf: Style,
 }
 
 impl Default for PrintConfig {
     fn default() -> PrintConfig {
         PrintConfig {
-            max_depth: u32::max_value(),
-            indent_size: 3,
+            depth: u32::max_value(),
+            indent: 3,
             chars: UTF_CHARS.into(),
-            branch_style: Style {
+            branch: Style {
                 dimmed: true,
                 ..Style::default()
             },
-            leaf_style: Style::default(),
-            style_when: StyleWhen::Tty,
+            leaf: Style::default(),
+            styled: StyleWhen::Tty,
         }
     }
 }
@@ -108,7 +109,7 @@ impl PrintConfig {
     ///
     pub fn should_style_output(&self, output_is_stdout: bool) -> bool {
         if cfg!(feature = "ansi") {
-            match self.style_when {
+            match self.styled {
                 StyleWhen::Always => true,
                 #[cfg(feature = "ansi")]
                 StyleWhen::Tty => output_is_stdout && stdout_isatty(),
@@ -126,7 +127,7 @@ impl PrintConfig {
     /// Without that feature it returns the input unchanged.
     ///
     pub fn paint_branch(&self, input: impl Display) -> impl Display {
-        self.branch_style.paint(input)
+        self.branch.paint(input)
     }
 
     ///
@@ -136,7 +137,7 @@ impl PrintConfig {
     /// Without that feature it returns the input unchanged.
     ///
     pub fn paint_leaf(&self, input: impl Display) -> impl Display {
-        self.leaf_style.paint(input)
+        self.leaf.paint(input)
     }
 }
 
