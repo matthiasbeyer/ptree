@@ -201,15 +201,13 @@ extern crate serde;
 extern crate serde_derive;
 
 ///
-/// Contains the [`TreeItem`] trait
+/// Contains the `TreeItem` trait
 ///
-/// [`TreeItem`]: item/trait.TreeItem.html
 pub mod item;
 
 ///
-/// Contains the [`TreeBuilder`] structure, useful for manually constructing trees
+/// Contains the `TreeBuilder` structure, useful for manually constructing trees
 ///
-/// [`TreeBuilder`]: builder/struct.TreeBuilder.html
 pub mod builder;
 
 ///
@@ -229,23 +227,21 @@ pub mod output;
 
 #[cfg(feature = "petgraph")]
 ///
-/// Implementation of [`TreeItem`] for [`petgraph::Graph`]
+/// Implementation of `TreeItem` for [`petgraph::Graph`]
 ///
 /// This module is enabled by the `"petgraph"` feature.
 ///
-/// [`TreeItem`]: item/trait.TreeItem.html
 /// [`petgraph::Graph`]: https://docs.rs/petgraph/0.4.13/petgraph/graph/struct.Graph.html
 pub mod graph;
 
 #[cfg(feature = "value")]
 ///
-/// Implementation of [`TreeItem`] for [`serde_value::Value`], allowing easy printing
+/// Implementation of `TreeItem` for [`serde_value::Value`], allowing easy printing of
 /// deserialized structures from a variety of formats.
 ///
 /// This module is enabled by the `"serde"` feature.
 ///
 /// [`TreeItem`]: item/trait.TreeItem.html
-/// [`serde_value::Value`]: https://docs.rs/serde-value/0.5.2/serde_value/enum.Value.html
 pub mod value;
 
 pub use output::{print_tree, print_tree_with, write_tree, write_tree_with};
