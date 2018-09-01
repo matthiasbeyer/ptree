@@ -1,3 +1,7 @@
+//!
+//! Output formatting is configured through the [`PrintConfig`] structure.
+//!
+
 use directories::BaseDirs;
 use config;
 
@@ -32,54 +36,54 @@ pub struct PrintConfig {
     /// Maximum recursion depth when printing
     ///
     /// The default is infinity, i.e. there is no recursion limit.
-    #[serde(rename = "depth")]
-    pub max_depth: u32,
+    pub depth: u32,
     /// Indentation size. The default value is 3.
-    #[serde(rename = "indent")]
-    pub indent_size: usize,
-    /// Control when output is styled
-    #[serde(rename = "styled")]
-    pub style_when: StyleWhen,
+    pub indent: usize,
+    /// Control when output is styled.
+    ///
+    /// The default value is [`StyleWhen::Tty`], meaning that ANSI styles are only used for printing to the standard
+    /// output, and only when the standard output is a TTY.
+    pub styled: StyleWhen,
     /// Characters used to print indentation lines or "branches" of the tree
-    #[serde(rename = "chars")]
     pub chars: IndentChars,
     /// ANSI style used for printing the indentation lines ("branches")
-    #[serde(rename = "branch")]
-    pub branch_style: Style,
+    pub branch: Style,
     /// ANSI style used for printing the item text ("leaves")
-    #[serde(rename = "leaf")]
-    pub leaf_style: Style,
+    pub leaf: Style,
 }
 
 impl Default for PrintConfig {
     fn default() -> PrintConfig {
         PrintConfig {
-            max_depth: u32::max_value(),
-            indent_size: 3,
+            depth: u32::max_value(),
+            indent: 3,
             chars: UTF_CHARS.into(),
-            branch_style: Style {
+            branch: Style {
                 dimmed: true,
                 ..Style::default()
             },
-            leaf_style: Style::default(),
-            style_when: StyleWhen::Tty,
+            leaf: Style::default(),
+            styled: StyleWhen::Tty,
         }
     }
 }
 
-impl PrintConfig {
-    ///
-    /// Create a default `PrintConfig` for printing to standard output
-    ///
-    /// When printing to standard output, we check if the output is a TTY.
-    /// If it is, and ANSI formatting is enabled, the branches will be dimmed by default.
-    /// If the output is not a TTY, this is equivalent to `PrintConfig::default()`.
-    ///
-    pub fn for_stdout() -> PrintConfig {
-        Default::default()
-    }
+///
+/// Enumeration of output kinds
+///
+/// Standard output is treated differently because we can query
+/// whether it is a TTY or not.
+///
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum OutputKind {
+    /// The program's standard output
+    Stdout,
+    /// The actual output is not known
+    Unknown,
+}
 
-    fn try_load() -> Option<PrintConfig> {
+impl PrintConfig {
+    fn try_from_env() -> Option<PrintConfig> {
         let mut settings = config::Config::default();
 
         if let Ok(p) = env::var("PTREE_CONFIG") {
@@ -99,19 +103,19 @@ impl PrintConfig {
     ///
     /// Load print configuration from a configuration file or environment variables
     ///
-    pub fn load() -> PrintConfig {
-        Self::try_load().unwrap_or_else(Default::default)
+    pub fn from_env() -> PrintConfig {
+        Self::try_from_env().unwrap_or_else(Default::default)
     }
 
     ///
     /// Checks if output to a writer should be styled
     ///
-    pub fn should_style_output(&self, output_is_stdout: bool) -> bool {
+    pub fn should_style_output(&self, output_kind: OutputKind) -> bool {
         if cfg!(feature = "ansi") {
-            match self.style_when {
-                StyleWhen::Always => true,
+            match (self.styled, output_kind) {
+                (StyleWhen::Always, _) => true,
                 #[cfg(feature = "ansi")]
-                StyleWhen::Tty => output_is_stdout && stdout_isatty(),
+                (StyleWhen::Tty, OutputKind::Stdout) => stdout_isatty(),
                 _ => false,
             }
         } else {
@@ -126,7 +130,7 @@ impl PrintConfig {
     /// Without that feature it returns the input unchanged.
     ///
     pub fn paint_branch(&self, input: impl Display) -> impl Display {
-        self.branch_style.paint(input)
+        self.branch.paint(input)
     }
 
     ///
@@ -136,7 +140,7 @@ impl PrintConfig {
     /// Without that feature it returns the input unchanged.
     ///
     pub fn paint_leaf(&self, input: impl Display) -> impl Display {
-        self.leaf_style.paint(input)
+        self.leaf.paint(input)
     }
 }
 
@@ -277,7 +281,7 @@ mod tests {
 
     fn load_config_from_path(path: &str) -> PrintConfig {
         env::set_var("PTREE_CONFIG", path);
-        let config = PrintConfig::load();
+        let config = PrintConfig::from_env();
         env::remove_var("PTREE_CONFIG");
 
         config
@@ -293,12 +297,12 @@ mod tests {
         }
 
         let config = load_config_from_path(path);
-        assert_eq!(config.indent_size, 7);
+        assert_eq!(config.indent, 7);
         assert_eq!(
-            config.branch_style.foreground,
+            config.branch.foreground,
             Some(Color::Named("maroon".to_string()))
         );
-        assert_eq!(config.branch_style.background, None);
+        assert_eq!(config.branch.background, None);
 
         fs::remove_file(path).unwrap();
     }
@@ -316,17 +320,17 @@ mod tests {
         }
 
         let config = load_config_from_path(path);
-        assert_eq!(config.indent_size, 5);
+        assert_eq!(config.indent, 5);
         assert_eq!(
-            config.leaf_style.foreground,
+            config.leaf.foreground,
             Some(Color::Named("green".to_string()))
         );
         assert_eq!(
-            config.leaf_style.background,
+            config.leaf.background,
             Some(Color::Named("steelblue".to_string()))
         );
-        assert_eq!(config.branch_style.foreground, None);
-        assert_eq!(config.branch_style.background, None);
+        assert_eq!(config.branch.foreground, None);
+        assert_eq!(config.branch.background, None);
 
         fs::remove_file(path).unwrap();
     }
@@ -345,19 +349,19 @@ mod tests {
         env::set_var("PTREE_DEPTH", "4");
 
         let config = load_config_from_path(path);
-        assert_eq!(config.indent_size, 5);
-        assert_eq!(config.max_depth, 4);
+        assert_eq!(config.indent, 5);
+        assert_eq!(config.depth, 4);
         assert_eq!(
-            config.leaf_style.foreground,
+            config.leaf.foreground,
             Some(Color::Named("green".to_string()))
         );
         assert_eq!(
-            config.leaf_style.background,
+            config.leaf.background,
             Some(Color::Named("steelblue".to_string()))
         );
-        assert_eq!(config.leaf_style.bold, true);
-        assert_eq!(config.branch_style.foreground, None);
-        assert_eq!(config.branch_style.background, None);
+        assert_eq!(config.leaf.bold, true);
+        assert_eq!(config.branch.foreground, None);
+        assert_eq!(config.branch.background, None);
 
         env::remove_var("PTREE_LEAF_BACKGROUND");
         env::remove_var("PTREE_LEAF_BOLD");

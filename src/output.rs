@@ -13,7 +13,7 @@ struct Indent {
 
 impl Indent {
     pub fn from_config(config: &PrintConfig) -> Indent {
-        Self::from_chars(config.indent_size, &config.chars)
+        Self::from_chars(config.indent, &config.chars)
     }
 
     pub fn from_chars(indent_size: usize, chars: &IndentChars) -> Indent {
@@ -45,7 +45,7 @@ fn print_item<T: TreeItem, W: io::Write>(
     item.write_self(f, leaf_style)?;
     writeln!(f, "")?;
 
-    if level < config.max_depth {
+    if level < config.depth {
         let children = item.children();
         if let Some((last_child, children)) = children.split_last() {
             let rp = child_prefix.clone() + &chars.regular_prefix;
@@ -76,13 +76,13 @@ fn print_item<T: TreeItem, W: io::Write>(
 
 /// Print the tree `item` to standard output using default formatting
 pub fn print_tree<T: TreeItem>(item: &T) -> io::Result<()> {
-    print_tree_with(item, &PrintConfig::load())
+    print_tree_with(item, &PrintConfig::from_env())
 }
 
 /// Print the tree `item` to standard output using custom formatting
 pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Result<()> {
-    let style = if config.should_style_output(true) {
-        config.leaf_style.clone()
+    let style = if config.should_style_output(OutputKind::Stdout) {
+        config.leaf.clone()
     } else {
         Style::default()
     };
@@ -104,13 +104,13 @@ pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Resul
 
 /// Write the tree `item` to writer `f` using default formatting
 pub fn write_tree<T: TreeItem, W: io::Write>(item: &T, mut f: W) -> io::Result<()> {
-    write_tree_with(item, &mut f, &PrintConfig::load())
+    write_tree_with(item, &mut f, &PrintConfig::from_env())
 }
 
 /// Write the tree `item` to writer `f` using custom formatting
 pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &PrintConfig) -> io::Result<()> {
-    let style = if config.should_style_output(true) {
-        config.leaf_style.clone()
+    let style = if config.should_style_output(OutputKind::Unknown) {
+        config.leaf.clone()
     } else {
         Style::default()
     };
@@ -155,7 +155,7 @@ mod tests {
     fn indent_from_config() {
         let config = {
             let mut config = PrintConfig::default();
-            config.indent_size = 3;
+            config.indent = 3;
             config.chars = UTF_CHARS.into();
             config
         };

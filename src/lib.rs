@@ -1,7 +1,6 @@
 #![warn(missing_docs)]
 #![doc(html_root_url = "https://docs.rs/ptree/0.1.0")]
 
-//! # ptree
 //!
 //! Pretty-print tree-like structures
 //!
@@ -14,6 +13,9 @@
 //! # fn main() -> Result<(), io::Error> {
 //! // Build a tree using a TreeBuilder
 //! let tree = TreeBuilder::new("tree".to_string())
+//!     .begin_child("branch".to_string())
+//!         .add_empty_child("leaf".to_string())
+//!     .end_child()
 //!     .add_empty_child("empty branch".to_string())
 //!     .build();
 //!
@@ -24,10 +26,47 @@
 //! # }
 //! ```
 //!
-//! ## Implementing the `TreeItem` trait
+//! ## Output configuration
+//!
+//! Ptree allows user configuration of the output format.
+//! Thus any program using the library can be configured globaly,
+//! providing a consistent user experience.
+//!
+//! Output formatting is controlled by a user configuration file or
+//! by environment variables.
+//!
+//! ```toml
+//! # <config_dir>/ptree.toml
+//!
+//! indent = 4
+//!
+//! [branch]
+//! foreground = red
+//! dimmed = true
+//!
+//! [leaf]
+//! bold = true
+//! ```
+//!
+//! The configuration file resides in the platform-specific user configuration directory,
+//! as returned by [`config_dir`].
+//! It can be in TOML, YAML, INI or JSON format, provided the file stem is `ptree`.
+//! A custom configuration file can be specified by setting the `PTREE_CONFIG` environment
+//! variable to the full path of the file.
+//!
+//! Individual configuration parameters can also be overriden using environment variables.
+//!
+//! ```bash
+//! PTREE_INDENT=3 PTREE_BRANCH_BACKGROUND=yellow <command>
+//! ```
+//!
+//!
+//! ## Advanced usage
+//!
+//! ### Implementing the `TreeItem` trait
 //!
 //! Rather than construct a new tree, one can implement the
-//! `TreeItem` trait for a custom data structure.
+//! [`TreeItem`] trait for a custom data structure.
 //!
 //! ```
 //! # use std::collections::HashMap;
@@ -57,7 +96,12 @@
 //! # }
 //! ```
 //!
-//! ## Output formatting
+//! ### Custom output formatting
+//!
+//! The [`print_tree`] function loads the user configuration to control
+//! output formatting.
+//! If you want to override this, you can create your own PrintConfig
+//! and use the [`print_tree_with`] function.
 //!
 //! ```
 //! # use std::collections::HashMap;
@@ -73,19 +117,19 @@
 //!
 //! // Set up the print configuration
 //! let config = {
-//!     let mut config = PrintConfig::for_stdout();
-//!     config.branch_style = Style {
+//!     let mut config = PrintConfig::from_env();
+//!     config.branch = Style {
 //!         foreground: Some(Color::Red),
 //!         background: Some(Color::Yellow),
 //!         dimmed: true,
 //!         ..Style::default()
 //!     };
-//!     config.leaf_style = Style {
+//!     config.leaf = Style {
 //!         bold: true,
 //!         ..Style::default()
 //!     };
 //!     config.chars = UTF_CHARS_BOLD.into();
-//!     config.indent_size = 4;
+//!     config.indent = 4;
 //!     config
 //! };
 //!
@@ -96,7 +140,13 @@
 //! # }
 //! ```
 //!
-//! ## Write to a file
+//! ### Write to a file
+//!
+//! To write a tree to a file rather than to standard output,
+//! use [`write_tree`] or [`write_tree_with`].
+//!
+//! Unless [`PrintConfig::styled`] is set to [`Always`], these two functions
+//! will not use ANSI coloring and styling for the output text.
 //!
 //! ```
 //! # use std::collections::HashMap;
@@ -121,6 +171,15 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! [`config_dir`]: https://docs.rs/directories/1.0.1/directories/struct.BaseDirs.html#method.config_dir
+//! [`TreeItem`]: item/trait.TreeItem.html
+//! [`print_tree`]: output/fn.print_tree.html
+//! [`print_tree_with`]: output/fn.print_tree_with.html
+//! [`write_tree`]: output/fn.write_tree.html
+//! [`write_tree_with`]: output/fn.write_tree_with.html
+//! [`PrintConfig::styled`]: print_config/struct.PrintConfig.html#structfield.styled
+//! [`Always`]: print_config/struct.PrintConfig.html#structfield.styled
 
 #[cfg(feature = "petgraph")]
 extern crate petgraph;
@@ -164,26 +223,28 @@ pub mod style;
 ///
 /// Functions for printing trees to standard output or to custom writers
 ///
-pub mod print_tree;
+pub mod output;
 
 #[cfg(feature = "petgraph")]
 ///
-/// Implementation of `TreeItem` for `petgraph::Graph`
+/// Implementation of `TreeItem` for [`petgraph::Graph`]
 ///
 /// This module is enabled by the `"petgraph"` feature.
 ///
+/// [`petgraph::Graph`]: https://docs.rs/petgraph/0.4.13/petgraph/graph/struct.Graph.html
 pub mod graph;
 
 #[cfg(feature = "value")]
 ///
-/// Implementation of `TreeItem` for `serde_value::Value`, allowing easy printing
+/// Implementation of `TreeItem` for [`serde_value::Value`], allowing easy printing of
 /// deserialized structures from a variety of formats.
 ///
 /// This module is enabled by the `"serde"` feature.
 ///
+/// [`TreeItem`]: item/trait.TreeItem.html
 pub mod value;
 
-pub use print_tree::{print_tree, print_tree_with, write_tree, write_tree_with};
+pub use output::{print_tree, print_tree_with, write_tree, write_tree_with};
 pub use builder::TreeBuilder;
 pub use item::TreeItem;
 pub use print_config::{IndentChars, PrintConfig};

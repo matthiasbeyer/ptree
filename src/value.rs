@@ -101,7 +101,7 @@ mod tests {
     use std::str::from_utf8;
     use super::*;
 
-    use print_tree::write_tree_with;
+    use output::write_tree_with;
     use print_config::PrintConfig;
 
     use serde_any;
@@ -109,20 +109,20 @@ mod tests {
     #[test]
     fn toml_value_output() {
         let toml = "\
-            configuration = [\"toml\", \"yaml\", \"json\", \"environment\"]\n\
-            charsets = [\"utf\", \"ascii\"]\n\
-            \n\
-            default_depth = 3\n\
-            \n\
-        ";
+                    configuration = [\"toml\", \"yaml\", \"json\", \"environment\"]\n\
+                    charsets = [\"utf\", \"ascii\"]\n\
+                    \n\
+                    default_depth = 3\n\
+                    \n\
+                    ";
 
         let value: Value = serde_any::from_str(toml, serde_any::Format::Toml).unwrap();
         let tree = ("toml".to_string(), value);
 
         let config = PrintConfig {
-            indent_size: 4,
-            leaf_style: Style::default(),
-            branch_style: Style::default(),
+            indent: 4,
+            leaf: Style::default(),
+            branch: Style::default(),
             ..PrintConfig::default()
         };
 
@@ -132,17 +132,17 @@ mod tests {
 
         let data = cursor.into_inner();
         let expected = "\
-            toml\n\
-            ├── charsets\n\
-            │   ├── utf\n\
-            │   └── ascii\n\
-            ├── configuration\n\
-            │   ├── toml\n\
-            │   ├── yaml\n\
-            │   ├── json\n\
-            │   └── environment\n\
-            └── default_depth = 3\n\
-        ";
+                        toml\n\
+                        ├── charsets\n\
+                        │   ├── utf\n\
+                        │   └── ascii\n\
+                        ├── configuration\n\
+                        │   ├── toml\n\
+                        │   ├── yaml\n\
+                        │   ├── json\n\
+                        │   └── environment\n\
+                        └── default_depth = 3\n\
+                        ";
         assert_eq!(from_utf8(&data).unwrap(), expected);
     }
 }

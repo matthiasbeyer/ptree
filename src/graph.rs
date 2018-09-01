@@ -1,5 +1,5 @@
 use item::TreeItem;
-use print_tree::{print_tree, write_tree_with};
+use output::{print_tree, write_tree_with};
 use print_config::PrintConfig;
 use style::Style;
 
@@ -82,9 +82,9 @@ mod tests {
         deps.extend_with_edges(&[(pg, fb), (pg, qc), (qc, rand), (rand, libc), (qc, libc)]);
 
         let config = PrintConfig {
-            indent_size: 4,
-            leaf_style: Style::default(),
-            branch_style: Style::default(),
+            indent: 4,
+            leaf: Style::default(),
+            branch: Style::default(),
             ..PrintConfig::default()
         };
 
@@ -94,13 +94,13 @@ mod tests {
 
         let data = cursor.into_inner();
         let expected = "\
-            petgraph\n\
-            ├── quickcheck\n\
-            │   ├── libc\n\
-            │   └── rand\n\
-            │       └── libc\n\
-            └── fixedbitset\n\
-        ";
+                        petgraph\n\
+                        ├── quickcheck\n\
+                        │   ├── libc\n\
+                        │   └── rand\n\
+                        │       └── libc\n\
+                        └── fixedbitset\n\
+                        ";
         assert_eq!(from_utf8(&data).unwrap(), expected);
     }
 }

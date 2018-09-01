@@ -1,6 +1,6 @@
 extern crate ptree;
 
-use ptree::{print_tree, TreeBuilder};
+use ptree::{print_tree_with, Color, PrintConfig, Style, TreeBuilder, print_config::UTF_CHARS_BOLD};
 
 fn main() {
     let tree = TreeBuilder::new("house".to_string())
@@ -27,5 +27,22 @@ fn main() {
         .end_child()
         .build();
 
-    print_tree(&tree).expect("Error printing tree");
+    let config = {
+        let mut config = PrintConfig::from_env();
+        config.branch = Style {
+            foreground: Some(Color::Red),
+            background: Some(Color::Yellow),
+            dimmed: true,
+            ..Style::default()
+        };
+        config.leaf = Style {
+            bold: true,
+            ..Style::default()
+        };
+        config.chars = UTF_CHARS_BOLD.into();
+        config.indent = 4;
+        config
+    };
+
+    print_tree_with(&tree, &config).expect("Error printing tree");
 }

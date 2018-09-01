@@ -1,8 +1,9 @@
 use item::StringItem;
 
 ///
-/// A builder for a tree of `StringItem`s
+/// A builder for a tree of [`StringItem`]s
 ///
+/// [`StringItem`]: ../item/struct.StringItem.html
 pub struct TreeBuilder {
     item: StringItem,
     level: u32,
