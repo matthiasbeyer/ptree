@@ -82,9 +82,9 @@ mod tests {
         deps.extend_with_edges(&[(pg, fb), (pg, qc), (qc, rand), (rand, libc), (qc, libc)]);
 
         let config = PrintConfig {
-            indent_size: 4,
-            leaf_style: Style::default(),
-            branch_style: Style::default(),
+            indent: 4,
+            leaf: Style::default(),
+            branch: Style::default(),
             ..PrintConfig::default()
         };
 

@@ -101,7 +101,7 @@ mod tests {
     use std::str::from_utf8;
     use super::*;
 
-    use print_tree::write_tree_with;
+    use output::write_tree_with;
     use print_config::PrintConfig;
 
     use serde_any;
@@ -120,9 +120,9 @@ mod tests {
         let tree = ("toml".to_string(), value);
 
         let config = PrintConfig {
-            indent_size: 4,
-            leaf_style: Style::default(),
-            branch_style: Style::default(),
+            indent: 4,
+            leaf: Style::default(),
+            branch: Style::default(),
             ..PrintConfig::default()
         };
 

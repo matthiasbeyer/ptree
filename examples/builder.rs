@@ -28,19 +28,19 @@ fn main() {
         .build();
 
     let config = {
-        let mut config = PrintConfig::for_stdout();
-        config.branch_style = Style {
+        let mut config = PrintConfig::from_env();
+        config.branch = Style {
             foreground: Some(Color::Red),
             background: Some(Color::Yellow),
             dimmed: true,
             ..Style::default()
         };
-        config.leaf_style = Style {
+        config.leaf = Style {
             bold: true,
             ..Style::default()
         };
         config.chars = UTF_CHARS_BOLD.into();
-        config.indent_size = 4;
+        config.indent = 4;
         config
     };
 

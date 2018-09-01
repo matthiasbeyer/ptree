@@ -69,18 +69,7 @@ impl Default for PrintConfig {
 }
 
 impl PrintConfig {
-    ///
-    /// Create a default `PrintConfig` for printing to standard output
-    ///
-    /// When printing to standard output, we check if the output is a TTY.
-    /// If it is, and ANSI formatting is enabled, the branches will be dimmed by default.
-    /// If the output is not a TTY, this is equivalent to `PrintConfig::default()`.
-    ///
-    pub fn for_stdout() -> PrintConfig {
-        Default::default()
-    }
-
-    fn try_load() -> Option<PrintConfig> {
+    fn try_from_env() -> Option<PrintConfig> {
         let mut settings = config::Config::default();
 
         if let Ok(p) = env::var("PTREE_CONFIG") {
@@ -100,8 +89,8 @@ impl PrintConfig {
     ///
     /// Load print configuration from a configuration file or environment variables
     ///
-    pub fn load() -> PrintConfig {
-        Self::try_load().unwrap_or_else(Default::default)
+    pub fn from_env() -> PrintConfig {
+        Self::try_from_env().unwrap_or_else(Default::default)
     }
 
     ///
@@ -278,7 +267,7 @@ mod tests {
 
     fn load_config_from_path(path: &str) -> PrintConfig {
         env::set_var("PTREE_CONFIG", path);
-        let config = PrintConfig::load();
+        let config = PrintConfig::from_env();
         env::remove_var("PTREE_CONFIG");
 
         config
@@ -294,12 +283,12 @@ mod tests {
         }
 
         let config = load_config_from_path(path);
-        assert_eq!(config.indent_size, 7);
+        assert_eq!(config.indent, 7);
         assert_eq!(
-            config.branch_style.foreground,
+            config.branch.foreground,
             Some(Color::Named("maroon".to_string()))
         );
-        assert_eq!(config.branch_style.background, None);
+        assert_eq!(config.branch.background, None);
 
         fs::remove_file(path).unwrap();
     }
@@ -317,17 +306,17 @@ mod tests {
         }
 
         let config = load_config_from_path(path);
-        assert_eq!(config.indent_size, 5);
+        assert_eq!(config.indent, 5);
         assert_eq!(
-            config.leaf_style.foreground,
+            config.leaf.foreground,
             Some(Color::Named("green".to_string()))
         );
         assert_eq!(
-            config.leaf_style.background,
+            config.leaf.background,
             Some(Color::Named("steelblue".to_string()))
         );
-        assert_eq!(config.branch_style.foreground, None);
-        assert_eq!(config.branch_style.background, None);
+        assert_eq!(config.branch.foreground, None);
+        assert_eq!(config.branch.background, None);
 
         fs::remove_file(path).unwrap();
     }
@@ -346,19 +335,19 @@ mod tests {
         env::set_var("PTREE_DEPTH", "4");
 
         let config = load_config_from_path(path);
-        assert_eq!(config.indent_size, 5);
-        assert_eq!(config.max_depth, 4);
+        assert_eq!(config.indent, 5);
+        assert_eq!(config.depth, 4);
         assert_eq!(
-            config.leaf_style.foreground,
+            config.leaf.foreground,
             Some(Color::Named("green".to_string()))
         );
         assert_eq!(
-            config.leaf_style.background,
+            config.leaf.background,
             Some(Color::Named("steelblue".to_string()))
         );
-        assert_eq!(config.leaf_style.bold, true);
-        assert_eq!(config.branch_style.foreground, None);
-        assert_eq!(config.branch_style.background, None);
+        assert_eq!(config.leaf.bold, true);
+        assert_eq!(config.branch.foreground, None);
+        assert_eq!(config.branch.background, None);
 
         env::remove_var("PTREE_LEAF_BACKGROUND");
         env::remove_var("PTREE_LEAF_BOLD");

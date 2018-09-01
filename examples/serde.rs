@@ -91,19 +91,19 @@ fn main() {
         let mut config = if opt.output.is_some() {
             ptree::PrintConfig::default()
         } else {
-            ptree::PrintConfig::for_stdout()
+            ptree::PrintConfig::from_env()
         };
         if let Some(d) = opt.depth {
-            config.max_depth = d;
+            config.depth = d;
         }
         if let Some(b) = opt.branch_style {
-            config.branch_style = b;
+            config.branch = b;
         }
         if let Some(l) = opt.leaf_style {
-            config.leaf_style = l;
+            config.leaf = l;
         }
         if let Some(i) = opt.indent {
-            config.indent_size = i;
+            config.indent = i;
         }
         if let Some(c) = opt.character_set {
             config.chars = c;

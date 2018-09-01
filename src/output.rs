@@ -76,7 +76,7 @@ fn print_item<T: TreeItem, W: io::Write>(
 
 /// Print the tree `item` to standard output using default formatting
 pub fn print_tree<T: TreeItem>(item: &T) -> io::Result<()> {
-    print_tree_with(item, &PrintConfig::load())
+    print_tree_with(item, &PrintConfig::from_env())
 }
 
 /// Print the tree `item` to standard output using custom formatting
@@ -104,7 +104,7 @@ pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Resul
 
 /// Write the tree `item` to writer `f` using default formatting
 pub fn write_tree<T: TreeItem, W: io::Write>(item: &T, mut f: W) -> io::Result<()> {
-    write_tree_with(item, &mut f, &PrintConfig::load())
+    write_tree_with(item, &mut f, &PrintConfig::from_env())
 }
 
 /// Write the tree `item` to writer `f` using custom formatting
@@ -155,7 +155,7 @@ mod tests {
     fn indent_from_config() {
         let config = {
             let mut config = PrintConfig::default();
-            config.indent_size = 3;
+            config.indent = 3;
             config.chars = UTF_CHARS.into();
             config
         };
