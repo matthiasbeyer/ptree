@@ -103,6 +103,43 @@ impl PrintConfig {
     ///
     /// Load print configuration from a configuration file or environment variables
     ///
+    /// ### Configuration files and variables
+    ///
+    /// If the `PTREE_CONFIG` environment variable is set, its value is used as the path to a file
+    /// from which to read to configuration parameters.
+    /// Otherwise, any file with a stem of `ptree` inside the directory returned by [`config_dir`]
+    /// is used.
+    ///
+    /// Finally, environment variables may be used to override the values from the configuration file.
+    /// For every field of the `PrintConfig` structure, the corresponding environment variable name
+    /// is PTREE_<FIELD_NAME>, for example `PTREE_INDENT=4` sets the `indent` field to 4.
+    /// Nested fields are supported; to set the branch foreground color use `PTREE_BRANCH_FOREGROUND=red`.
+    ///
+    /// ### Field value
+    ///
+    /// [`indent`] and [`depth`] accept non-negative integers.
+    ///
+    /// [`styled`] accept either `"always"`, `"tty"` or `"never"`
+    ///
+    /// [`leaf`] and [`branch`] accept a `Style` structure.
+    /// In a configuration file, this takes a form of a map.
+    /// Using environment variables, each field has to be set separately.
+    ///
+    /// Color fields accept either an ANSI named color, a HTML named color,
+    /// an ANSI integer fixed color, or a [red, green, blue] triple of non-negative integers.
+    ///
+    /// Other `Style` fields are boolean parameters.
+    /// In a configuration file, they are parsed according to the rules of the deserialization format.
+    /// In an environment variables, `TRUE`, `ON` and `1` evaluate to `true`, and `FALSE`, `OFF` and `0`
+    /// evaluate to `false`. Environment variable values are case insensitive.
+    ///
+    /// [`chars`] can only be configured by setting each of their fields to the appropriate character.
+    ///
+    /// ### Errors
+    ///
+    /// This function does not report errors.
+    /// If anything goes wrong while loading the configuration parameters, a default `PrintConfig` is returned.
+    ///
     pub fn from_env() -> PrintConfig {
         Self::try_from_env().unwrap_or_else(Default::default)
     }
