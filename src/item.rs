@@ -17,8 +17,8 @@ pub trait TreeItem: Clone {
     ///
     /// Write the item's own contents (without children) to `f`
     ///
-    /// The function returns an [`io::Result<()>`][io::Result], so calls to [`f.write`][write_fn] and [`write!`][write_macro]
-    /// can be chained with `?`.
+    /// The function returns an [`io::Result<()>`][io::Result], so calls to [`f.write`][write_fn] and
+    /// [`write!`][write_macro] can be chained with `?`.
     ///
     /// The provided `style` may be used for formatting hints.
     /// Usually, everything printed should be run through [`style.paint`].
