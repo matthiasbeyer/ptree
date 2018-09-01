@@ -17,15 +17,19 @@ pub trait TreeItem: Clone {
     ///
     /// Write the item's own contents (without children) to `f`
     ///
-    /// The function returns an `io::Result<()>`, so calls to `f.write()` and `write!`
+    /// The function returns an [`io::Result<()>`][io::Result], so calls to [`f.write`][write_fn] and [`write!`][write_macro]
     /// can be chained with `?`.
     ///
     /// The provided `style` may be used for formatting hints.
-    /// Usually, everything printed should be run through `Style::paint()`.
+    /// Usually, everything printed should be run through [`style.paint`].
     /// However, this is not enforced, and custom implementations may choose to format
     /// only parts of the output, apply its own formatting in combination with the provided
     /// config, or ignore formatting altogether.
     ///
+    /// [io::Result]: https://doc.rust-lang.org/std/io/type.Result.html
+    /// [write_fn]: https://doc.rust-lang.org/std/io/trait.Write.html#tymethod.write
+    /// [write_macro]: https://doc.rust-lang.org/std/macro.write.html
+    /// [`style.paint`]: ../style/struct.Style.html#typemethod.paint
     fn write_self<W: io::Write>(&self, f: &mut W, style: &Style) -> io::Result<()>;
 
     ///
@@ -37,14 +41,19 @@ pub trait TreeItem: Clone {
 }
 
 ///
-/// A simple concrete implementation of `TreeItem` using `String`s
+/// A simple concrete implementation of [`TreeItem`] using [`String`]s
 ///
 /// While a tree of `StringItem`s can be constructed directly,
-/// it is usually easier to use a `TreeBuilder`.
+/// it is usually easier to use a [`TreeBuilder`].
 ///
+/// [`TreeItem`]: ../item/trait.TreeItem.html
+/// [`String`]: https://doc.rust-lang.org/std/string/struct.String.html
+/// [`TreeBuilder`]: ../builder/struct.TreeBuilder.html
 #[derive(Clone, Debug)]
 pub struct StringItem {
-    /// The item's own text, to be returned by `write_self`
+    /// The item's own text, to be returned by [`write_self`]
+    ///
+    /// [`write_self`]: trait.TreeItem.html#tymethod.write_self
     pub text: String,
     /// The list of item's children
     pub children: Vec<StringItem>,

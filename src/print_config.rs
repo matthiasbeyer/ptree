@@ -68,6 +68,20 @@ impl Default for PrintConfig {
     }
 }
 
+///
+/// Enumeration of output kinds
+///
+/// Standard output is treated differently because we can query
+/// whether it is a TTY or not.
+///
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum OutputKind {
+    /// The program's standard output
+    Stdout,
+    /// The actual output is not known
+    Unknown,
+}
+
 impl PrintConfig {
     fn try_from_env() -> Option<PrintConfig> {
         let mut settings = config::Config::default();
@@ -96,12 +110,12 @@ impl PrintConfig {
     ///
     /// Checks if output to a writer should be styled
     ///
-    pub fn should_style_output(&self, output_is_stdout: bool) -> bool {
+    pub fn should_style_output(&self, output_kind: OutputKind) -> bool {
         if cfg!(feature = "ansi") {
-            match self.styled {
-                StyleWhen::Always => true,
+            match (self.styled, output_kind) {
+                (StyleWhen::Always, _) => true,
                 #[cfg(feature = "ansi")]
-                StyleWhen::Tty => output_is_stdout && stdout_isatty(),
+                (StyleWhen::Tty, OutputKind::Stdout) => stdout_isatty(),
                 _ => false,
             }
         } else {

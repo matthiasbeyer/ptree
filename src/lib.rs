@@ -1,7 +1,6 @@
 #![warn(missing_docs)]
 #![doc(html_root_url = "https://docs.rs/ptree/0.1.0")]
 
-//! # ptree
 //!
 //! Pretty-print tree-like structures
 //!
@@ -50,7 +49,7 @@
 //! ```
 //!
 //! The configuration file resides in the platform-specific user configuration directory,
-//! as returned by [`directories::BaseDirs::config_dir`](https://docs.rs/directories/1.0.1/directories/struct.BaseDirs.html#method.config_dir).
+//! as returned by [`config_dir`].
 //! It can be in TOML, YAML, INI or JSON format, provided the file stem is `ptree`.
 //! A custom configuration file can be specified by setting the `PTREE_CONFIG` environment
 //! variable to the full path of the file.
@@ -67,7 +66,7 @@
 //! ### Implementing the `TreeItem` trait
 //!
 //! Rather than construct a new tree, one can implement the
-//! [TreeItem] trait for a custom data structure.
+//! [`TreeItem`] trait for a custom data structure.
 //!
 //! ```
 //! # use std::collections::HashMap;
@@ -146,7 +145,7 @@
 //! To write a tree to a file rather than to standard output,
 //! use [`write_tree`] or [`write_tree_with`].
 //!
-//! Unless [`PrintConfig::styled`] is set to [`Always`](print_config::StyleWhen::Always), these two functions
+//! Unless [`PrintConfig::styled`] is set to [`Always`], these two functions
 //! will not use ANSI coloring and styling for the output text.
 //!
 //! ```
@@ -173,6 +172,14 @@
 //! # }
 //! ```
 //!
+//! [`config_dir`]: https://docs.rs/directories/1.0.1/directories/struct.BaseDirs.html#method.config_dir
+//! [`TreeItem`]: item/trait.TreeItem.html
+//! [`print_tree`]: output/fn.print_tree.html
+//! [`print_tree_with`]: output/fn.print_tree_with.html
+//! [`write_tree`]: output/fn.write_tree.html
+//! [`write_tree_with`]: output/fn.write_tree_with.html
+//! [`PrintConfig::styled`]: print_config/struct.PrintConfig.html#structfield.styled
+//! [`Always`]: print_config/struct.PrintConfig.html#structfield.styled
 
 #[cfg(feature = "petgraph")]
 extern crate petgraph;
@@ -196,11 +203,13 @@ extern crate serde_derive;
 ///
 /// Contains the [`TreeItem`] trait
 ///
+/// [`TreeItem`]: item/trait.TreeItem.html
 pub mod item;
 
 ///
 /// Contains the [`TreeBuilder`] structure, useful for manually constructing trees
 ///
+/// [`TreeBuilder`]: builder/struct.TreeBuilder.html
 pub mod builder;
 
 ///
@@ -224,6 +233,8 @@ pub mod output;
 ///
 /// This module is enabled by the `"petgraph"` feature.
 ///
+/// [`TreeItem`]: item/trait.TreeItem.html
+/// [`petgraph::Graph`]: https://docs.rs/petgraph/0.4.13/petgraph/graph/struct.Graph.html
 pub mod graph;
 
 #[cfg(feature = "value")]
@@ -233,6 +244,8 @@ pub mod graph;
 ///
 /// This module is enabled by the `"serde"` feature.
 ///
+/// [`TreeItem`]: item/trait.TreeItem.html
+/// [`serde_value::Value`]: https://docs.rs/serde-value/0.5.2/serde_value/enum.Value.html
 pub mod value;
 
 pub use output::{print_tree, print_tree_with, write_tree, write_tree_with};

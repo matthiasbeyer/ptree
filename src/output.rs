@@ -81,7 +81,7 @@ pub fn print_tree<T: TreeItem>(item: &T) -> io::Result<()> {
 
 /// Print the tree `item` to standard output using custom formatting
 pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Result<()> {
-    let style = if config.should_style_output(true) {
+    let style = if config.should_style_output(OutputKind::Stdout) {
         config.leaf.clone()
     } else {
         Style::default()
@@ -109,7 +109,7 @@ pub fn write_tree<T: TreeItem, W: io::Write>(item: &T, mut f: W) -> io::Result<(
 
 /// Write the tree `item` to writer `f` using custom formatting
 pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &PrintConfig) -> io::Result<()> {
-    let style = if config.should_style_output(true) {
+    let style = if config.should_style_output(OutputKind::Unknown) {
         config.leaf.clone()
     } else {
         Style::default()
