@@ -119,7 +119,7 @@ impl PrintConfig {
     ///
     /// [`indent`] and [`depth`] accept non-negative integers.
     ///
-    /// [`styled`] accept either `"always"`, `"tty"` or `"never"`
+    /// [`styled`] accepts either `"always"`, `"tty"` or `"never"`
     ///
     /// [`leaf`] and [`branch`] accept a `Style` structure.
     /// In a configuration file, this takes a form of a map.
