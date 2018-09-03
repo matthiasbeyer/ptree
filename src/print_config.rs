@@ -115,7 +115,7 @@ impl PrintConfig {
     /// is PTREE_<FIELD_NAME>, for example `PTREE_INDENT=4` sets the `indent` field to 4.
     /// Nested fields are supported; to set the branch foreground color use `PTREE_BRANCH_FOREGROUND=red`.
     ///
-    /// ### Field value
+    /// ### Field values
     ///
     /// [`indent`] and [`depth`] accept non-negative integers.
     ///
@@ -134,6 +134,22 @@ impl PrintConfig {
     /// evaluate to `false`. Environment variable values are case insensitive.
     ///
     /// [`chars`] can only be configured by setting each of their fields to the appropriate character.
+    ///
+    /// ### Configuration file example
+    ///
+    /// ```toml
+    /// indent = 3
+    /// depth = 100
+    /// styled = tty
+    ///
+    /// [branch]
+    /// color = red
+    /// dimmed = true
+    /// bold = false
+    ///
+    /// [leaf]
+    /// color = MediumSeaGreen
+    /// ```
     ///
     /// ### Errors
     ///
