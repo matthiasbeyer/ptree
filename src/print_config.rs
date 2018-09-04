@@ -281,7 +281,7 @@ where
         where
             E: de::Error,
         {
-            FromStr::from_str(value).map_err(|_| E::invalid_value(Unexpected::Str(value), &"chars"))
+            FromStr::from_str(value).map_err(|_| E::invalid_value(Unexpected::Str(value), &"'utf', 'ascii', 'ascii-plus', 'utf-double', 'utf-bold' or 'utf-dashed'"))
         }
 
         fn visit_map<M>(self, visitor: M) -> Result<T, M::Error>
