@@ -12,54 +12,54 @@ lazy_static! {
 }
 
 #[test]
-fn test_chars_by_string_ascii() {
+fn test_characters_by_string_ascii() {
     let _g = ENV_MUTEX.lock().unwrap();
 
     let mut f = tempfile::Builder::new()
         .suffix(".toml")
         .tempfile().unwrap();
-    writeln!(f, "chars = \"ascii\"").unwrap();
+    writeln!(f, "characters = \"ascii\"").unwrap();
 
     env::set_var("PTREE_CONFIG", f.path());
     let config = ptree::PrintConfig::from_env();
-    assert_eq!(config.chars, ptree::print_config::ASCII_CHARS_TICK.into());
+    assert_eq!(config.characters, ptree::print_config::ASCII_CHARS_TICK.into());
 }
 
 #[test]
-fn test_chars_by_string_utf() {
+fn test_characters_by_string_utf() {
     let _g = ENV_MUTEX.lock().unwrap();
 
     let mut f = tempfile::Builder::new()
         .suffix(".toml")
         .tempfile().unwrap();
-    writeln!(f, "chars = \"utf\"").unwrap();
+    writeln!(f, "characters = \"utf\"").unwrap();
 
     env::set_var("PTREE_CONFIG", f.path());
     let config = ptree::PrintConfig::from_env();
-    assert_eq!(config.chars, ptree::print_config::UTF_CHARS.into());
+    assert_eq!(config.characters, ptree::print_config::UTF_CHARS.into());
 }
 
 #[test]
-fn test_chars_by_string_double() {
+fn test_characters_by_string_double() {
     let _g = ENV_MUTEX.lock().unwrap();
 
     let mut f = tempfile::Builder::new()
         .suffix(".toml")
         .tempfile().unwrap();
-    writeln!(f, "chars = \"utf-double\"").unwrap();
+    writeln!(f, "characters = \"utf-double\"").unwrap();
 
     env::set_var("PTREE_CONFIG", f.path());
     let config = ptree::PrintConfig::from_env();
-    assert_eq!(config.chars, ptree::print_config::UTF_CHARS_DOUBLE.into());
+    assert_eq!(config.characters, ptree::print_config::UTF_CHARS_DOUBLE.into());
 }
 
 #[test]
-fn test_chars_by_struct() {
+fn test_characters_by_struct() {
     let mut f = tempfile::Builder::new()
         .suffix(".toml")
         .tempfile().unwrap();
     writeln!(f, "\
-                [chars]\n\
+                [characters]\n\
                 down_and_right = \"|\"\n\
                 down = \"|\"\n\
                 turn_right = \"`\"\n\
@@ -69,9 +69,9 @@ fn test_chars_by_struct() {
 
     env::set_var("PTREE_CONFIG", f.path());
     let config = ptree::PrintConfig::from_env();
-    assert_eq!(config.chars.down_and_right, "|");
-    assert_eq!(config.chars.down, "|");
-    assert_eq!(config.chars.turn_right, "`");
-    assert_eq!(config.chars.right, "-");
-    assert_eq!(config.chars.empty, " ");
+    assert_eq!(config.characters.down_and_right, "|");
+    assert_eq!(config.characters.down, "|");
+    assert_eq!(config.characters.turn_right, "`");
+    assert_eq!(config.characters.right, "-");
+    assert_eq!(config.characters.empty, " ");
 }

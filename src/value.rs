@@ -110,7 +110,7 @@ mod tests {
     fn toml_value_output() {
         let toml = "\
                     configuration = [\"toml\", \"yaml\", \"json\", \"environment\"]\n\
-                    charsets = [\"utf\", \"ascii\"]\n\
+                    charactersets = [\"utf\", \"ascii\"]\n\
                     \n\
                     default_depth = 3\n\
                     \n\
@@ -133,7 +133,7 @@ mod tests {
         let data = cursor.into_inner();
         let expected = "\
                         toml\n\
-                        ├── charsets\n\
+                        ├── charactersets\n\
                         │   ├── utf\n\
                         │   └── ascii\n\
                         ├── configuration\n\

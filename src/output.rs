@@ -13,20 +13,20 @@ struct Indent {
 
 impl Indent {
     pub fn from_config(config: &PrintConfig) -> Indent {
-        Self::from_chars(config.indent, &config.chars)
+        Self::from_characters(config.indent, &config.characters)
     }
 
-    pub fn from_chars(indent_size: usize, chars: &IndentChars) -> Indent {
+    pub fn from_characters(indent_size: usize, characters: &IndentChars) -> Indent {
         let n = if indent_size > 2 { indent_size - 2 } else { 0 };
 
-        let right_pad = chars.right.repeat(n);
-        let empty_pad = chars.empty.repeat(n);
+        let right_pad = characters.right.repeat(n);
+        let empty_pad = characters.empty.repeat(n);
 
         Indent {
-            regular_prefix: format!("{}{} ", chars.down_and_right, right_pad),
-            child_prefix: format!("{}{} ", chars.down, empty_pad),
-            last_regular_prefix: format!("{}{} ", chars.turn_right, right_pad),
-            last_child_prefix: format!("{}{} ", chars.empty, empty_pad),
+            regular_prefix: format!("{}{} ", characters.down_and_right, right_pad),
+            child_prefix: format!("{}{} ", characters.down, empty_pad),
+            last_regular_prefix: format!("{}{} ", characters.turn_right, right_pad),
+            last_child_prefix: format!("{}{} ", characters.empty, empty_pad),
         }
     }
 }
@@ -37,7 +37,7 @@ fn print_item<T: TreeItem, W: io::Write>(
     prefix: String,
     child_prefix: String,
     config: &PrintConfig,
-    chars: &Indent,
+    characters: &Indent,
     leaf_style: &Style,
     level: u32,
 ) -> io::Result<()> {
@@ -48,8 +48,8 @@ fn print_item<T: TreeItem, W: io::Write>(
     if level < config.depth {
         let children = item.children();
         if let Some((last_child, children)) = children.split_last() {
-            let rp = child_prefix.clone() + &chars.regular_prefix;
-            let cp = child_prefix.clone() + &chars.child_prefix;
+            let rp = child_prefix.clone() + &characters.regular_prefix;
+            let cp = child_prefix.clone() + &characters.child_prefix;
 
             for c in children {
                 print_item(
@@ -58,16 +58,16 @@ fn print_item<T: TreeItem, W: io::Write>(
                     rp.clone(),
                     cp.clone(),
                     config,
-                    chars,
+                    characters,
                     leaf_style,
                     level + 1,
                 )?;
             }
 
-            let rp = child_prefix.clone() + &chars.last_regular_prefix;
-            let cp = child_prefix.clone() + &chars.last_child_prefix;
+            let rp = child_prefix.clone() + &characters.last_regular_prefix;
+            let cp = child_prefix.clone() + &characters.last_child_prefix;
 
-            print_item(last_child, f, rp, cp, config, chars, leaf_style, level + 1)?;
+            print_item(last_child, f, rp, cp, config, characters, leaf_style, level + 1)?;
         }
     }
 
@@ -87,7 +87,7 @@ pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Resul
         Style::default()
     };
 
-    let chars = Indent::from_config(config);
+    let characters = Indent::from_config(config);
     let out = io::stdout();
     let mut handle = out.lock();
     print_item(
@@ -96,7 +96,7 @@ pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Resul
         "".to_string(),
         "".to_string(),
         config,
-        &chars,
+        &characters,
         &style,
         0,
     )
@@ -115,14 +115,14 @@ pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &P
         Style::default()
     };
 
-    let chars = Indent::from_config(config);
+    let characters = Indent::from_config(config);
     print_item(
         item,
         &mut f,
         "".to_string(),
         "".to_string(),
         config,
-        &chars,
+        &characters,
         &style,
         0,
     )
@@ -134,8 +134,8 @@ mod tests {
     use print_config::PrintConfig;
 
     #[test]
-    fn indent_from_chars() {
-        let indent = Indent::from_chars(4, &UTF_CHARS.into());
+    fn indent_from_characters() {
+        let indent = Indent::from_characters(4, &UTF_CHARS.into());
         assert_eq!(indent.regular_prefix, "├── ");
         assert_eq!(indent.last_regular_prefix, "└── ");
         assert_eq!(indent.child_prefix, "│   ");
@@ -143,8 +143,8 @@ mod tests {
     }
 
     #[test]
-    fn indent_from_chars_ascii() {
-        let indent = Indent::from_chars(6, &ASCII_CHARS_TICK.into());
+    fn indent_from_characters_ascii() {
+        let indent = Indent::from_characters(6, &ASCII_CHARS_TICK.into());
         assert_eq!(indent.regular_prefix, "|---- ");
         assert_eq!(indent.last_regular_prefix, "`---- ");
         assert_eq!(indent.child_prefix, "|     ");
@@ -156,7 +156,7 @@ mod tests {
         let config = {
             let mut config = PrintConfig::default();
             config.indent = 3;
-            config.chars = UTF_CHARS.into();
+            config.characters = UTF_CHARS.into();
             config
         };
         let indent = Indent::from_config(&config);

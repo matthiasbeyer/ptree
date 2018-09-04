@@ -39,7 +39,7 @@ fn main() {
             bold: true,
             ..Style::default()
         };
-        config.chars = UTF_CHARS_BOLD.into();
+        config.characters = UTF_CHARS_BOLD.into();
         config.indent = 4;
         config
     };

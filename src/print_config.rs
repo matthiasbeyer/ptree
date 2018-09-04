@@ -50,7 +50,7 @@ pub struct PrintConfig {
     pub styled: StyleWhen,
     /// Characters used to print indentation lines or "branches" of the tree
     #[serde(deserialize_with = "string_or_struct")]
-    pub chars: IndentChars,
+    pub characters: IndentChars,
     /// ANSI style used for printing the indentation lines ("branches")
     pub branch: Style,
     /// ANSI style used for printing the item text ("leaves")
@@ -62,7 +62,7 @@ impl Default for PrintConfig {
         PrintConfig {
             depth: u32::max_value(),
             indent: 3,
-            chars: UTF_CHARS.into(),
+            characters: UTF_CHARS.into(),
             branch: Style {
                 dimmed: true,
                 ..Style::default()
@@ -130,7 +130,7 @@ impl PrintConfig {
     /// In a configuration file, this takes a form of a map.
     /// Using environment variables, each field has to be set separately.
     ///
-    /// Color fields accept either an ANSI named color, a HTML named color,
+    /// Color fields accept either an ANSI named color, a named web color, a hex code like "#33ffbb",
     /// an ANSI integer fixed color, or a [red, green, blue] triple of non-negative integers.
     ///
     /// Other `Style` fields are boolean parameters.
@@ -138,22 +138,24 @@ impl PrintConfig {
     /// In an environment variables, `TRUE`, `ON` and `1` evaluate to `true`, and `FALSE`, `OFF` and `0`
     /// evaluate to `false`. Environment variable values are case insensitive.
     ///
-    /// [`chars`] can only be configured by setting each of their fields to the appropriate character.
+    /// [`characters`] can be set to a string with a value of "utf", "ascii", "ascii-plus", "utf-bold", "utf-double" or "utf-dashed".
+    /// Alternatively, it can be set to a structure with each of their fields set to the appropriate character.
     ///
     /// ### Configuration file example
     ///
     /// ```toml
     /// indent = 3
     /// depth = 100
-    /// styled = tty
+    /// styled = "tty"
     ///
     /// [branch]
-    /// color = red
+    /// foreground = "red"
     /// dimmed = true
     /// bold = false
     ///
     /// [leaf]
-    /// color = MediumSeaGreen
+    /// foreground = "MediumSeaGreen"
+    /// background = "#102018"
     /// ```
     ///
     /// ### Errors

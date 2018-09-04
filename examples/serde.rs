@@ -106,7 +106,7 @@ fn main() {
             config.indent = i;
         }
         if let Some(c) = opt.character_set {
-            config.chars = c;
+            config.characters = c;
         }
         config
     };
