@@ -10,9 +10,12 @@ use isatty::stdout_isatty;
 
 use style::Style;
 
-use std::fmt::Display;
+use std::fmt::{self, Display};
 use std::env;
 use std::str::FromStr;
+use std::marker::PhantomData;
+
+use serde::de::{self, Deserialize, Deserializer, Visitor, MapAccess, Unexpected};
 
 ///
 /// Configuration option controlling when output styling is used
@@ -46,6 +49,7 @@ pub struct PrintConfig {
     /// output, and only when the standard output is a TTY.
     pub styled: StyleWhen,
     /// Characters used to print indentation lines or "branches" of the tree
+    #[serde(deserialize_with = "string_or_struct")]
     pub chars: IndentChars,
     /// ANSI style used for printing the indentation lines ("branches")
     pub branch: Style,
@@ -246,6 +250,53 @@ impl FromStr for IndentChars {
             _ => Err(()),
         }
     }
+}
+
+// Deserializes from either a struct or a string
+//
+// Taken from https://serde.rs/string-or-struct.html
+fn string_or_struct<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+where
+    T: Deserialize<'de> + FromStr<Err = ()>,
+    D: Deserializer<'de>,
+{
+    // This is a Visitor that forwards string types to T's `FromStr` impl and
+    // forwards map types to T's `Deserialize` impl. The `PhantomData` is to
+    // keep the compiler from complaining about T being an unused generic type
+    // parameter. We need T in order to know the Value type for the Visitor
+    // impl.
+    struct StringOrStruct<T>(PhantomData<fn() -> T>);
+
+    impl<'de, T> Visitor<'de> for StringOrStruct<T>
+    where
+        T: Deserialize<'de> + FromStr<Err = ()>,
+    {
+        type Value = T;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("string or map")
+        }
+
+        fn visit_str<E>(self, value: &str) -> Result<T, E>
+        where
+            E: de::Error,
+        {
+            FromStr::from_str(value).map_err(|_| E::invalid_value(Unexpected::Str(value), &"chars"))
+        }
+
+        fn visit_map<M>(self, visitor: M) -> Result<T, M::Error>
+        where
+            M: MapAccess<'de>,
+        {
+            // `MapAccessDeserializer` is a wrapper that turns a `MapAccess`
+            // into a `Deserializer`, allowing it to be used as the input to T's
+            // `Deserialize` implementation. T then deserializes itself using
+            // the entries from the map visitor.
+            Deserialize::deserialize(de::value::MapAccessDeserializer::new(visitor))
+        }
+    }
+
+    deserializer.deserialize_any(StringOrStruct(PhantomData))
 }
 
 ///
