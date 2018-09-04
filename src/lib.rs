@@ -60,6 +60,7 @@
 //! PTREE_INDENT=3 PTREE_BRANCH_BACKGROUND=yellow <command>
 //! ```
 //!
+//! See [`PrintConfig`] for the list of all configuration options.
 //!
 //! ## Advanced usage
 //!
@@ -180,6 +181,7 @@
 //! [`write_tree_with`]: output/fn.write_tree_with.html
 //! [`PrintConfig::styled`]: print_config/struct.PrintConfig.html#structfield.styled
 //! [`Always`]: print_config/struct.PrintConfig.html#structfield.styled
+//! [`PrintConfig`]: print_config/struct.PrintConfig.html
 
 #[cfg(feature = "petgraph")]
 extern crate petgraph;

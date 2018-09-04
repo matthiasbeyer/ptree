@@ -10,8 +10,12 @@ use isatty::stdout_isatty;
 
 use style::Style;
 
-use std::fmt::Display;
+use std::fmt::{self, Display};
 use std::env;
+use std::str::FromStr;
+use std::marker::PhantomData;
+
+use serde::de::{self, Deserialize, Deserializer, Visitor, MapAccess, Unexpected};
 
 ///
 /// Configuration option controlling when output styling is used
@@ -45,6 +49,7 @@ pub struct PrintConfig {
     /// output, and only when the standard output is a TTY.
     pub styled: StyleWhen,
     /// Characters used to print indentation lines or "branches" of the tree
+    #[serde(deserialize_with = "string_or_struct")]
     pub chars: IndentChars,
     /// ANSI style used for printing the indentation lines ("branches")
     pub branch: Style,
@@ -102,6 +107,59 @@ impl PrintConfig {
 
     ///
     /// Load print configuration from a configuration file or environment variables
+    ///
+    /// ### Configuration files and variables
+    ///
+    /// If the `PTREE_CONFIG` environment variable is set, its value is used as the path to a file
+    /// from which to read to configuration parameters.
+    /// Otherwise, any file with a stem of `ptree` inside the directory returned by [`config_dir`]
+    /// is used.
+    ///
+    /// Finally, environment variables may be used to override the values from the configuration file.
+    /// For every field of the `PrintConfig` structure, the corresponding environment variable name
+    /// is PTREE_<FIELD_NAME>, for example `PTREE_INDENT=4` sets the `indent` field to 4.
+    /// Nested fields are supported; to set the branch foreground color use `PTREE_BRANCH_FOREGROUND=red`.
+    ///
+    /// ### Field values
+    ///
+    /// [`indent`] and [`depth`] accept non-negative integers.
+    ///
+    /// [`styled`] accepts either `"always"`, `"tty"` or `"never"`
+    ///
+    /// [`leaf`] and [`branch`] accept a `Style` structure.
+    /// In a configuration file, this takes a form of a map.
+    /// Using environment variables, each field has to be set separately.
+    ///
+    /// Color fields accept either an ANSI named color, a HTML named color,
+    /// an ANSI integer fixed color, or a [red, green, blue] triple of non-negative integers.
+    ///
+    /// Other `Style` fields are boolean parameters.
+    /// In a configuration file, they are parsed according to the rules of the deserialization format.
+    /// In an environment variables, `TRUE`, `ON` and `1` evaluate to `true`, and `FALSE`, `OFF` and `0`
+    /// evaluate to `false`. Environment variable values are case insensitive.
+    ///
+    /// [`chars`] can only be configured by setting each of their fields to the appropriate character.
+    ///
+    /// ### Configuration file example
+    ///
+    /// ```toml
+    /// indent = 3
+    /// depth = 100
+    /// styled = tty
+    ///
+    /// [branch]
+    /// color = red
+    /// dimmed = true
+    /// bold = false
+    ///
+    /// [leaf]
+    /// color = MediumSeaGreen
+    /// ```
+    ///
+    /// ### Errors
+    ///
+    /// This function does not report errors.
+    /// If anything goes wrong while loading the configuration parameters, a default `PrintConfig` is returned.
     ///
     pub fn from_env() -> PrintConfig {
         Self::try_from_env().unwrap_or_else(Default::default)
@@ -176,6 +234,69 @@ impl From<StaticIndentChars> for IndentChars {
             empty: s.empty.to_string(),
         }
     }
+}
+
+impl FromStr for IndentChars {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "utf" => Ok(UTF_CHARS.into()),
+            "ascii" | "ascii-tick" => Ok(ASCII_CHARS_TICK.into()),
+            "ascii-plus" => Ok(ASCII_CHARS_PLUS.into()),
+            "utf-bold" => Ok(UTF_CHARS_BOLD.into()),
+            "utf-dashed" => Ok(UTF_CHARS_DASHED.into()),
+            "utf-double" => Ok(UTF_CHARS_DOUBLE.into()),
+            _ => Err(()),
+        }
+    }
+}
+
+// Deserializes from either a struct or a string
+//
+// Taken from https://serde.rs/string-or-struct.html
+fn string_or_struct<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+where
+    T: Deserialize<'de> + FromStr<Err = ()>,
+    D: Deserializer<'de>,
+{
+    // This is a Visitor that forwards string types to T's `FromStr` impl and
+    // forwards map types to T's `Deserialize` impl. The `PhantomData` is to
+    // keep the compiler from complaining about T being an unused generic type
+    // parameter. We need T in order to know the Value type for the Visitor
+    // impl.
+    struct StringOrStruct<T>(PhantomData<fn() -> T>);
+
+    impl<'de, T> Visitor<'de> for StringOrStruct<T>
+    where
+        T: Deserialize<'de> + FromStr<Err = ()>,
+    {
+        type Value = T;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("string or map")
+        }
+
+        fn visit_str<E>(self, value: &str) -> Result<T, E>
+        where
+            E: de::Error,
+        {
+            FromStr::from_str(value).map_err(|_| E::invalid_value(Unexpected::Str(value), &"'utf', 'ascii', 'ascii-plus', 'utf-double', 'utf-bold' or 'utf-dashed'"))
+        }
+
+        fn visit_map<M>(self, visitor: M) -> Result<T, M::Error>
+        where
+            M: MapAccess<'de>,
+        {
+            // `MapAccessDeserializer` is a wrapper that turns a `MapAccess`
+            // into a `Deserializer`, allowing it to be used as the input to T's
+            // `Deserialize` implementation. T then deserializes itself using
+            // the entries from the map visitor.
+            Deserialize::deserialize(de::value::MapAccessDeserializer::new(visitor))
+        }
+    }
+
+    deserializer.deserialize_any(StringOrStruct(PhantomData))
 }
 
 ///
