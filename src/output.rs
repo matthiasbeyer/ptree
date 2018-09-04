@@ -67,7 +67,16 @@ fn print_item<T: TreeItem, W: io::Write>(
             let rp = child_prefix.clone() + &characters.last_regular_prefix;
             let cp = child_prefix.clone() + &characters.last_child_prefix;
 
-            print_item(last_child, f, rp, cp, config, characters, leaf_style, level + 1)?;
+            print_item(
+                last_child,
+                f,
+                rp,
+                cp,
+                config,
+                characters,
+                leaf_style,
+                level + 1,
+            )?;
         }
     }
 

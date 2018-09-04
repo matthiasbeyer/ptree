@@ -15,7 +15,7 @@ use std::env;
 use std::str::FromStr;
 use std::marker::PhantomData;
 
-use serde::de::{self, Deserialize, Deserializer, Visitor, MapAccess, Unexpected};
+use serde::de::{self, Deserialize, Deserializer, MapAccess, Unexpected, Visitor};
 
 ///
 /// Configuration option controlling when output styling is used
@@ -138,8 +138,9 @@ impl PrintConfig {
     /// In an environment variables, `TRUE`, `ON` and `1` evaluate to `true`, and `FALSE`, `OFF` and `0`
     /// evaluate to `false`. Environment variable values are case insensitive.
     ///
-    /// [`characters`] can be set to a string with a value of "utf", "ascii", "ascii-plus", "utf-bold", "utf-double" or "utf-dashed".
-    /// Alternatively, it can be set to a structure with each of their fields set to the appropriate character.
+    /// [`characters`] can be set to a string with a value of "utf", "ascii", "ascii-plus", "utf-bold", "utf-double"
+    /// or "utf-dashed". Alternatively, it can be set to a structure with each of their fields set to the
+    /// appropriate character.
     ///
     /// ### Configuration file example
     ///
@@ -283,7 +284,12 @@ where
         where
             E: de::Error,
         {
-            FromStr::from_str(value).map_err(|_| E::invalid_value(Unexpected::Str(value), &"'utf', 'ascii', 'ascii-plus', 'utf-double', 'utf-bold' or 'utf-dashed'"))
+            FromStr::from_str(value).map_err(|_| {
+                E::invalid_value(
+                    Unexpected::Str(value),
+                    &"'utf', 'ascii', 'ascii-plus', 'utf-double', 'utf-bold' or 'utf-dashed'",
+                )
+            })
         }
 
         fn visit_map<M>(self, visitor: M) -> Result<T, M::Error>
