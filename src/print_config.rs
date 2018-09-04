@@ -12,6 +12,7 @@ use style::Style;
 
 use std::fmt::Display;
 use std::env;
+use std::str::FromStr;
 
 ///
 /// Configuration option controlling when output styling is used
@@ -227,6 +228,22 @@ impl From<StaticIndentChars> for IndentChars {
             turn_right: s.turn_right.to_string(),
             right: s.right.to_string(),
             empty: s.empty.to_string(),
+        }
+    }
+}
+
+impl FromStr for IndentChars {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "utf" => Ok(UTF_CHARS.into()),
+            "ascii" | "ascii-tick" => Ok(ASCII_CHARS_TICK.into()),
+            "ascii-plus" => Ok(ASCII_CHARS_PLUS.into()),
+            "utf-bold" => Ok(UTF_CHARS_BOLD.into()),
+            "utf-dashed" => Ok(UTF_CHARS_DASHED.into()),
+            "utf-double" => Ok(UTF_CHARS_DOUBLE.into()),
+            _ => Err(()),
         }
     }
 }
