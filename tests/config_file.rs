@@ -1,5 +1,4 @@
 extern crate ptree;
-extern crate serde_any;
 extern crate tempfile;
 #[macro_use]
 extern crate lazy_static;
