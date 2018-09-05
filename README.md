@@ -1,10 +1,10 @@
 Pretty-print tree-like structures
 
-## Using
+## Usage
 
 ```
 [dependencies]
-ptree = "0.1"
+ptree = "0.2"
 ```
 
 ## Constructing a tree
@@ -20,6 +20,12 @@ The `ptree` crate includes implementations of `TreeItem` for some common types, 
 A tree can be printed to standard output using `print_tree`, or to an arbitrary writer using `write_tree`.
 Both functions have variants which take a `PrintConfig` that controls the output.
 Text is formatted using `ansi-term`, which allows changing colors and styles of the printed text.
+
+## User configuration
+
+By default, `ptree` loads configuration from a user configuration file.
+This allows end users to globally configure the output format for all applications using `ptree`.
+Applications can use this configuration directly, modify it, or ignore it altogether.
 
 ## License
 
