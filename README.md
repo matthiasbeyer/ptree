@@ -1,5 +1,8 @@
 Pretty-print tree-like structures
 
+The `ptree` crate supports output formatting due to a user-provided configuration file and/or environment variables.
+![Different output styles](https://i.imgur.com/KqPUFHq.png)
+
 ## Usage
 
 ```
