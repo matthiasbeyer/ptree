@@ -2,15 +2,14 @@ extern crate ptree;
 extern crate serde_any;
 extern crate serde_value;
 
-#[macro_use]
 extern crate structopt;
 
 use structopt::StructOpt;
 
-use std::path::PathBuf;
-use std::fs::File;
-use ptree::style::{Color, Style};
 use ptree::print_config;
+use ptree::style::{Color, Style};
+use std::fs::File;
+use std::path::PathBuf;
 
 #[derive(Clone, Debug, StructOpt)]
 struct Opt {
@@ -23,20 +22,20 @@ struct Opt {
     #[structopt(short = "o", long = "output", parse(from_os_str))]
     output: Option<PathBuf>,
 
-    #[structopt(short = "l", long = "leaf-style", parse(from_str = "style_from_str"))]
+    #[structopt(short = "l", long = "leaf-style", parse(from_str = style_from_str))]
     leaf_style: Option<Style>,
 
-    #[structopt(short = "b", long = "branch-style", parse(from_str = "style_from_str"))]
+    #[structopt(short = "b", long = "branch-style", parse(from_str = style_from_str))]
     branch_style: Option<Style>,
 
-    #[structopt(short = "c", long = "character-set", parse(from_str = "chars_from_str"))]
+    #[structopt(short = "c", long = "character-set", parse(from_str = chars_from_str))]
     character_set: Option<ptree::IndentChars>,
 
     #[structopt(short = "i", long = "indent")]
     indent: Option<usize>,
 }
 
-fn chars_from_str(s: &&str) -> ptree::IndentChars {
+fn chars_from_str(s: &str) -> ptree::IndentChars {
     match &s.to_lowercase()[..] {
         "ascii" | "ascii-plus" => print_config::ASCII_CHARS_PLUS.into(),
         "ascii-tick" => print_config::ASCII_CHARS_TICK.into(),
@@ -47,7 +46,7 @@ fn chars_from_str(s: &&str) -> ptree::IndentChars {
     }
 }
 
-fn style_from_str(s: &&str) -> Style {
+fn style_from_str(s: &str) -> Style {
     let mut style = Style::default();
 
     for i in s.split(",") {

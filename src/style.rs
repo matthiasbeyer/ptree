@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 #[cfg(feature = "ansi")]
 use ansi_term;
+use serde::{Deserialize, Serialize};
 #[cfg(feature = "ansi")]
 use tint;
 
@@ -179,9 +180,9 @@ impl Style {
 #[cfg(test)]
 mod tests {
 
-    use serde_any;
-    use ansi_term;
     use super::*;
+    use ansi_term;
+    use serde_any;
 
     #[derive(Deserialize)]
     pub struct Wrapper {
@@ -208,19 +209,10 @@ mod tests {
         assert_eq!(toml_to_ansi("\"green\""), ansi_term::Color::Green);
         assert_eq!(toml_to_ansi("10"), ansi_term::Color::Fixed(10));
         assert_eq!(toml_to_ansi("110"), ansi_term::Color::Fixed(110));
-        assert_eq!(
-            toml_to_ansi("[10, 20, 30]"),
-            ansi_term::Color::RGB(10, 20, 30)
-        );
+        assert_eq!(toml_to_ansi("[10, 20, 30]"), ansi_term::Color::RGB(10, 20, 30));
         assert_eq!(toml_to_ansi("\"maroon\""), ansi_term::Color::RGB(128, 0, 0));
-        assert_eq!(
-            toml_to_ansi("\"steelblue\""),
-            ansi_term::Color::RGB(70, 130, 180)
-        );
-        assert_eq!(
-            toml_to_ansi("\"#4682B4\""),
-            ansi_term::Color::RGB(70, 130, 180)
-        );
+        assert_eq!(toml_to_ansi("\"steelblue\""), ansi_term::Color::RGB(70, 130, 180));
+        assert_eq!(toml_to_ansi("\"#4682B4\""), ansi_term::Color::RGB(70, 130, 180));
     }
 
     #[test]
@@ -229,19 +221,10 @@ mod tests {
         assert_eq!(yaml_to_ansi("\"green\""), ansi_term::Color::Green);
         assert_eq!(yaml_to_ansi("10"), ansi_term::Color::Fixed(10));
         assert_eq!(yaml_to_ansi("110"), ansi_term::Color::Fixed(110));
-        assert_eq!(
-            yaml_to_ansi("[10, 20, 30]"),
-            ansi_term::Color::RGB(10, 20, 30)
-        );
+        assert_eq!(yaml_to_ansi("[10, 20, 30]"), ansi_term::Color::RGB(10, 20, 30));
         assert_eq!(yaml_to_ansi("\"maroon\""), ansi_term::Color::RGB(128, 0, 0));
-        assert_eq!(
-            yaml_to_ansi("\"steelblue\""),
-            ansi_term::Color::RGB(70, 130, 180)
-        );
-        assert_eq!(
-            yaml_to_ansi("\"#4682B4\""),
-            ansi_term::Color::RGB(70, 130, 180)
-        );
+        assert_eq!(yaml_to_ansi("\"steelblue\""), ansi_term::Color::RGB(70, 130, 180));
+        assert_eq!(yaml_to_ansi("\"#4682B4\""), ansi_term::Color::RGB(70, 130, 180));
     }
 
     #[test]

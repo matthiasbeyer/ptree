@@ -189,7 +189,7 @@ extern crate petgraph;
 #[cfg(feature = "ansi")]
 extern crate ansi_term;
 #[cfg(feature = "ansi")]
-extern crate isatty;
+extern crate atty;
 #[cfg(feature = "ansi")]
 extern crate tint;
 
@@ -199,8 +199,6 @@ extern crate serde_value;
 extern crate config;
 extern crate directories;
 extern crate serde;
-#[macro_use]
-extern crate serde_derive;
 
 ///
 /// Contains the `TreeItem` trait
@@ -246,9 +244,9 @@ pub mod graph;
 /// [`TreeItem`]: item/trait.TreeItem.html
 pub mod value;
 
-pub use output::{print_tree, print_tree_with, write_tree, write_tree_with};
 pub use builder::TreeBuilder;
 pub use item::TreeItem;
+pub use output::{print_tree, print_tree_with, write_tree, write_tree_with};
 pub use print_config::{IndentChars, PrintConfig};
 pub use style::{Color, Style};
 

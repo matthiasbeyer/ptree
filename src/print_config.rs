@@ -2,20 +2,23 @@
 //! Output formatting is configured through the [`PrintConfig`] structure.
 //!
 
-use directories::BaseDirs;
 use config;
+use directories::BaseDirs;
 
 #[cfg(feature = "ansi")]
-use isatty::stdout_isatty;
+use atty::Stream;
 
 use style::Style;
 
-use std::fmt::{self, Display};
 use std::env;
-use std::str::FromStr;
+use std::fmt::{self, Display};
 use std::marker::PhantomData;
+use std::str::FromStr;
 
-use serde::de::{self, Deserialize, Deserializer, MapAccess, Unexpected, Visitor};
+use serde::{
+    de::{self, Deserializer, MapAccess, Unexpected, Visitor},
+    Deserialize, Serialize,
+};
 
 ///
 /// Configuration option controlling when output styling is used
@@ -176,7 +179,7 @@ impl PrintConfig {
             match (self.styled, output_kind) {
                 (StyleWhen::Always, _) => true,
                 #[cfg(feature = "ansi")]
-                (StyleWhen::Tty, OutputKind::Stdout) => stdout_isatty(),
+                (StyleWhen::Tty, OutputKind::Stdout) => atty::is(Stream::Stdout),
                 _ => false,
             }
         } else {
@@ -427,10 +430,7 @@ mod tests {
 
         let config = load_config_from_path(path);
         assert_eq!(config.indent, 7);
-        assert_eq!(
-            config.branch.foreground,
-            Some(Color::Named("maroon".to_string()))
-        );
+        assert_eq!(config.branch.foreground, Some(Color::Named("maroon".to_string())));
         assert_eq!(config.branch.background, None);
 
         fs::remove_file(path).unwrap();
@@ -445,19 +445,14 @@ mod tests {
             writeln!(
                 f,
                 "indent = 5\n[leaf]\nforeground = \"green\"\nbackground = \"steelblue\"\n"
-            ).unwrap();
+            )
+            .unwrap();
         }
 
         let config = load_config_from_path(path);
         assert_eq!(config.indent, 5);
-        assert_eq!(
-            config.leaf.foreground,
-            Some(Color::Named("green".to_string()))
-        );
-        assert_eq!(
-            config.leaf.background,
-            Some(Color::Named("steelblue".to_string()))
-        );
+        assert_eq!(config.leaf.foreground, Some(Color::Named("green".to_string())));
+        assert_eq!(config.leaf.background, Some(Color::Named("steelblue".to_string())));
         assert_eq!(config.branch.foreground, None);
         assert_eq!(config.branch.background, None);
 
@@ -480,14 +475,8 @@ mod tests {
         let config = load_config_from_path(path);
         assert_eq!(config.indent, 5);
         assert_eq!(config.depth, 4);
-        assert_eq!(
-            config.leaf.foreground,
-            Some(Color::Named("green".to_string()))
-        );
-        assert_eq!(
-            config.leaf.background,
-            Some(Color::Named("steelblue".to_string()))
-        );
+        assert_eq!(config.leaf.foreground, Some(Color::Named("green".to_string())));
+        assert_eq!(config.leaf.background, Some(Color::Named("steelblue".to_string())));
         assert_eq!(config.leaf.bold, true);
         assert_eq!(config.branch.foreground, None);
         assert_eq!(config.branch.background, None);
