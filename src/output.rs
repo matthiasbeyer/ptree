@@ -38,10 +38,11 @@ fn print_item<T: TreeItem, W: io::Write>(
     child_prefix: String,
     config: &PrintConfig,
     characters: &Indent,
+    branch_style: &Style,
     leaf_style: &Style,
     level: u32,
 ) -> io::Result<()> {
-    write!(f, "{}", config.paint_branch(prefix))?;
+    write!(f, "{}", branch_style.paint(prefix))?;
     item.write_self(f, leaf_style)?;
     writeln!(f, "")?;
 
@@ -59,6 +60,7 @@ fn print_item<T: TreeItem, W: io::Write>(
                     cp.clone(),
                     config,
                     characters,
+                    branch_style,
                     leaf_style,
                     level + 1,
                 )?;
@@ -74,6 +76,7 @@ fn print_item<T: TreeItem, W: io::Write>(
                 cp,
                 config,
                 characters,
+                branch_style,
                 leaf_style,
                 level + 1,
             )?;
@@ -90,10 +93,10 @@ pub fn print_tree<T: TreeItem>(item: &T) -> io::Result<()> {
 
 /// Print the tree `item` to standard output using custom formatting
 pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Result<()> {
-    let style = if config.should_style_output(OutputKind::Stdout) {
-        config.leaf.clone()
+    let (branch_style, leaf_style) = if config.should_style_output(OutputKind::Stdout) {
+        (config.branch.clone(), config.leaf.clone())
     } else {
-        Style::default()
+        (Style::default(), Style::default())
     };
 
     let characters = Indent::from_config(config);
@@ -106,7 +109,8 @@ pub fn print_tree_with<T: TreeItem>(item: &T, config: &PrintConfig) -> io::Resul
         "".to_string(),
         config,
         &characters,
-        &style,
+        &branch_style,
+        &leaf_style,
         0,
     )
 }
@@ -118,10 +122,10 @@ pub fn write_tree<T: TreeItem, W: io::Write>(item: &T, mut f: W) -> io::Result<(
 
 /// Write the tree `item` to writer `f` using custom formatting
 pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &PrintConfig) -> io::Result<()> {
-    let style = if config.should_style_output(OutputKind::Unknown) {
-        config.leaf.clone()
+    let (branch_style, leaf_style) = if config.should_style_output(OutputKind::Unknown) {
+        (config.branch.clone(), config.leaf.clone())
     } else {
-        Style::default()
+        (Style::default(), Style::default())
     };
 
     let characters = Indent::from_config(config);
@@ -132,7 +136,8 @@ pub fn write_tree_with<T: TreeItem, W: io::Write>(item: &T, mut f: W, config: &P
         "".to_string(),
         config,
         &characters,
-        &style,
+        &branch_style,
+        &leaf_style,
         0,
     )
 }
