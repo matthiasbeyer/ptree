@@ -20,10 +20,7 @@ fn test_characters_by_string_ascii() {
 
     env::set_var("PTREE_CONFIG", f.path());
     let config = ptree::PrintConfig::from_env();
-    assert_eq!(
-        config.characters,
-        ptree::print_config::ASCII_CHARS_TICK.into()
-    );
+    assert_eq!(config.characters, ptree::print_config::ASCII_CHARS_TICK.into());
 }
 
 #[test]
@@ -47,10 +44,7 @@ fn test_characters_by_string_double() {
 
     env::set_var("PTREE_CONFIG", f.path());
     let config = ptree::PrintConfig::from_env();
-    assert_eq!(
-        config.characters,
-        ptree::print_config::UTF_CHARS_DOUBLE.into()
-    );
+    assert_eq!(config.characters, ptree::print_config::UTF_CHARS_DOUBLE.into());
 }
 
 #[test]
@@ -66,7 +60,8 @@ fn test_characters_by_struct() {
          right = \"-\"\n\
          empty = \" \"\
          "
-    ).unwrap();
+    )
+    .unwrap();
 
     env::set_var("PTREE_CONFIG", f.path());
     let config = ptree::PrintConfig::from_env();
