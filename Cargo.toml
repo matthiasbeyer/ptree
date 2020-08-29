@@ -1,6 +1,6 @@
 [package]
 name = "ptree"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Miha Čančula <miha@noughmad.eu>"]
 license = "MIT OR Apache-2.0"
 description = "Pretty-print tree-like structures"
