@@ -13,20 +13,26 @@ struct Indent {
 
 impl Indent {
     pub fn from_config(config: &PrintConfig) -> Indent {
-        Self::from_characters(config.indent, &config.characters)
+        Self::from_characters_and_padding(config.indent, config.padding, &config.characters)
     }
 
     pub fn from_characters(indent_size: usize, characters: &IndentChars) -> Indent {
-        let n = if indent_size > 2 { indent_size - 2 } else { 0 };
+        Self::from_characters_and_padding(indent_size, 1, characters)
+    }
+
+    pub fn from_characters_and_padding(indent_size: usize, padding: usize, characters: &IndentChars) -> Indent {
+        let m = 1 + padding;
+        let n = if indent_size > m { indent_size - m } else { 0 };
 
         let right_pad = characters.right.repeat(n);
         let empty_pad = characters.empty.repeat(n);
+        let item_pad = characters.empty.repeat(padding);
 
         Indent {
-            regular_prefix: format!("{}{} ", characters.down_and_right, right_pad),
-            child_prefix: format!("{}{} ", characters.down, empty_pad),
-            last_regular_prefix: format!("{}{} ", characters.turn_right, right_pad),
-            last_child_prefix: format!("{}{} ", characters.empty, empty_pad),
+            regular_prefix: format!("{}{}{}", characters.down_and_right, right_pad, item_pad),
+            child_prefix: format!("{}{}{}", characters.down, empty_pad, item_pad),
+            last_regular_prefix: format!("{}{}{}", characters.turn_right, right_pad, item_pad),
+            last_child_prefix: format!("{}{}{}", characters.empty, empty_pad, item_pad),
         }
     }
 }
@@ -178,5 +184,20 @@ mod tests {
         assert_eq!(indent.last_regular_prefix, "└─ ");
         assert_eq!(indent.child_prefix, "│  ");
         assert_eq!(indent.last_child_prefix, "   ");
+    }
+
+    #[test]
+    fn indent_from_characters_pad() {
+        let indent = Indent::from_characters_and_padding(4, 0, &UTF_CHARS.into());
+        assert_eq!(indent.regular_prefix, "├───");
+        assert_eq!(indent.last_regular_prefix, "└───");
+        assert_eq!(indent.child_prefix, "│   ");
+        assert_eq!(indent.last_child_prefix, "    ");
+
+        let indent = Indent::from_characters_and_padding(4, 2, &UTF_CHARS.into());
+        assert_eq!(indent.regular_prefix, "├─  ");
+        assert_eq!(indent.last_regular_prefix, "└─  ");
+        assert_eq!(indent.child_prefix, "│   ");
+        assert_eq!(indent.last_child_prefix, "    ");
     }
 }
