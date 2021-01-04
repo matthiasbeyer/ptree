@@ -49,6 +49,8 @@ fn test_characters_by_string_double() {
 
 #[test]
 fn test_characters_by_struct() {
+    let _g = ENV_MUTEX.lock().unwrap();
+
     let mut f = tempfile::Builder::new().suffix(".toml").tempfile().unwrap();
     writeln!(
         f,
