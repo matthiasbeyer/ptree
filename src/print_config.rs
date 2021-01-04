@@ -46,6 +46,8 @@ pub struct PrintConfig {
     pub depth: u32,
     /// Indentation size. The default value is 3.
     pub indent: usize,
+    /// Padding size. The default value is 1.
+    pub padding: usize,
     /// Control when output is styled.
     ///
     /// The default value is [`StyleWhen::Tty`], meaning that ANSI styles are only used for printing to the standard
@@ -65,6 +67,7 @@ impl Default for PrintConfig {
         PrintConfig {
             depth: u32::max_value(),
             indent: 3,
+            padding: 1,
             characters: UTF_CHARS.into(),
             branch: Style {
                 dimmed: true,
