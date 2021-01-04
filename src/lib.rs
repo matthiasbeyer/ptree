@@ -1,5 +1,5 @@
 #![warn(missing_docs)]
-#![doc(html_root_url = "https://docs.rs/ptree/0.3.0")]
+#![doc(html_root_url = "https://docs.rs/ptree/0.3.1")]
 
 //!
 //! Pretty-print tree-like structures
