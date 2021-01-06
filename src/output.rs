@@ -16,6 +16,7 @@ impl Indent {
         Self::from_characters_and_padding(config.indent, config.padding, &config.characters)
     }
 
+    #[allow(dead_code)]
     pub fn from_characters(indent_size: usize, characters: &IndentChars) -> Indent {
         Self::from_characters_and_padding(indent_size, 1, characters)
     }
