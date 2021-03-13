@@ -8,3 +8,28 @@ test:cargo:
   - linkchecker target/doc/ptree/
   - cargo tarpaulin --out Xml
   - "bash <(curl -s https://codecov.io/bash)"
+
+test:nofeatures:
+  script:
+  - rustc --version && cargo --version
+  - cargo test --all --no-default-features
+
+test:ansi:
+  script:
+  - rustc --version && cargo --version
+  - cargo test --all --no-default-features --features ansi
+
+test:petgraph:
+  script:
+  - rustc --version && cargo --version
+  - cargo test --all --no-default-features --features petgraph
+
+test:conf:
+  script:
+  - rustc --version && cargo --version
+  - cargo test --all --no-default-features --features conf
+
+test:value:
+  script:
+  - rustc --version && cargo --version
+  - cargo build --all --no-default-features --features value

@@ -12,6 +12,7 @@ lazy_static! {
 }
 
 #[test]
+#[cfg(feature = "conf")]
 fn test_characters_by_string_ascii() {
     let _g = ENV_MUTEX.lock().unwrap();
 
@@ -24,6 +25,7 @@ fn test_characters_by_string_ascii() {
 }
 
 #[test]
+#[cfg(feature = "conf")]
 fn test_characters_by_string_utf() {
     let _g = ENV_MUTEX.lock().unwrap();
 
@@ -36,6 +38,7 @@ fn test_characters_by_string_utf() {
 }
 
 #[test]
+#[cfg(feature = "conf")]
 fn test_characters_by_string_double() {
     let _g = ENV_MUTEX.lock().unwrap();
 
@@ -48,6 +51,7 @@ fn test_characters_by_string_double() {
 }
 
 #[test]
+#[cfg(feature = "conf")]
 fn test_characters_by_struct() {
     let _g = ENV_MUTEX.lock().unwrap();
 

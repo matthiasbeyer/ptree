@@ -1,8 +1,9 @@
 use std::fmt::Display;
 
+use serde::{Deserialize, Serialize};
+
 #[cfg(feature = "ansi")]
 use ansi_term;
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "ansi")]
 use tint;
 
@@ -113,6 +114,7 @@ impl Default for Color {
 }
 
 impl Color {
+    #[cfg(feature = "ansi")]
     fn to_ansi_color(&self) -> ansi_term::Color {
         match self {
             Color::Black => ansi_term::Color::Black,
@@ -181,14 +183,17 @@ impl Style {
 mod tests {
 
     use super::*;
-    use ansi_term;
     use serde_any;
+
+    #[cfg(feature = "ansi")]
+    use ansi_term;
 
     #[derive(Deserialize)]
     pub struct Wrapper {
         color: Color,
     }
 
+    #[cfg(feature = "ansi")]
     fn toml_to_ansi(s: &str) -> ansi_term::Color {
         serde_any::from_str::<Wrapper>(&format!("color = {}", s), serde_any::Format::Toml)
             .unwrap()
@@ -196,6 +201,7 @@ mod tests {
             .to_ansi_color()
     }
 
+    #[cfg(feature = "ansi")]
     fn yaml_to_ansi(s: &str) -> ansi_term::Color {
         serde_any::from_str::<Wrapper>(&format!("color: {}", s), serde_any::Format::Yaml)
             .unwrap()
@@ -204,6 +210,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "ansi")]
     fn color_from_toml() {
         assert_eq!(toml_to_ansi("\"red\""), ansi_term::Color::Red);
         assert_eq!(toml_to_ansi("\"green\""), ansi_term::Color::Green);
@@ -216,6 +223,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "ansi")]
     fn color_from_yaml() {
         assert_eq!(yaml_to_ansi("\"red\""), ansi_term::Color::Red);
         assert_eq!(yaml_to_ansi("\"green\""), ansi_term::Color::Green);
