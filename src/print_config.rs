@@ -2,7 +2,9 @@
 //! Output formatting is configured through the [`PrintConfig`] structure.
 //!
 
+#[cfg(feature = "conf")]
 use config;
+#[cfg(feature = "conf")]
 use directories::BaseDirs;
 
 #[cfg(feature = "ansi")]
@@ -94,6 +96,11 @@ pub enum OutputKind {
 }
 
 impl PrintConfig {
+
+    /// Try to instantiate PrintConfig from environment
+    ///
+    /// Only available with feature "config"
+    #[cfg(feature = "conf")]
     fn try_from_env() -> Option<PrintConfig> {
         let mut settings = config::Config::default();
 
@@ -169,9 +176,13 @@ impl PrintConfig {
     ///
     /// This function does not report errors.
     /// If anything goes wrong while loading the configuration parameters, a default `PrintConfig` is returned.
-    ///
+    #[cfg(feature = "conf")]
     pub fn from_env() -> PrintConfig {
         Self::try_from_env().unwrap_or_else(Default::default)
+    }
+    #[cfg(not(feature = "conf"))]
+    pub fn from_env() -> PrintConfig {
+        Default::default()
     }
 
     ///
@@ -414,6 +425,7 @@ mod tests {
         static ref ENV_MUTEX: Mutex<()> = Mutex::new(());
     }
 
+    #[cfg(feature = "conf")]
     fn load_config_from_path(path: &str) -> PrintConfig {
         env::set_var("PTREE_CONFIG", path);
         let config = PrintConfig::from_env();
@@ -423,6 +435,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "conf")]
     fn load_yaml_config_file() {
         let _g = ENV_MUTEX.lock().unwrap();
         let path = "ptree.yaml";
@@ -440,6 +453,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "conf")]
     fn load_toml_config_file() {
         let _g = ENV_MUTEX.lock().unwrap();
         let path = "ptree.toml";
@@ -463,6 +477,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "conf")]
     fn load_env() {
         let _g = ENV_MUTEX.lock().unwrap();
         let path = "ptree.toml";
