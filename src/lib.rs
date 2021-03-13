@@ -196,6 +196,7 @@ extern crate tint;
 #[cfg(feature = "value")]
 extern crate serde_value;
 
+#[cfg(feature = "conf")]
 extern crate config;
 extern crate directories;
 extern crate serde;

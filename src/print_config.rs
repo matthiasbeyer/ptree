@@ -2,6 +2,7 @@
 //! Output formatting is configured through the [`PrintConfig`] structure.
 //!
 
+#[cfg(feature = "conf")]
 use config;
 use directories::BaseDirs;
 
@@ -94,6 +95,11 @@ pub enum OutputKind {
 }
 
 impl PrintConfig {
+
+    /// Try to instantiate PrintConfig from environment
+    ///
+    /// Only available with feature "config"
+    #[cfg(feature = "conf")]
     fn try_from_env() -> Option<PrintConfig> {
         let mut settings = config::Config::default();
 
