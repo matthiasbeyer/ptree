@@ -198,6 +198,7 @@ extern crate serde_value;
 
 #[cfg(feature = "conf")]
 extern crate config;
+#[cfg(feature = "conf")]
 extern crate directories;
 extern crate serde;
 
